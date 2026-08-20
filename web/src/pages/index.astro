@@ -1,0 +1,289 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getArticles } from '../lib/articles';
+import { formatDate } from '../lib/format';
+import { site, hero, focusAreas, closing } from '../site.config';
+
+const articles = await getArticles();
+const featured = articles.slice(0, 4);
+
+const jsonLd = [
+  {
+    '@type': 'WebPage',
+    '@id': `${site.url}/#webpage`,
+    url: `${site.url}/`,
+    name: `${site.name} — ${site.jobTitle}`,
+    description: site.description,
+    inLanguage: site.lang,
+    isPartOf: { '@id': `${site.url}/#website` },
+    about: { '@id': `${site.url}/#person` },
+  },
+];
+---
+
+<BaseLayout
+  title={`${site.name} — ${site.jobTitle}`}
+  description={site.description}
+  path="/"
+  bareTitle
+  jsonLd={jsonLd}
+>
+  <!-- ================= Hero ================= -->
+  <section class="hero">
+    <div class="container">
+      <p class="label hero-eyebrow">
+        {site.jobTitle}{site.location ? ` · ${site.location}` : ''}
+      </p>
+
+      <h1 class="hero-name">{site.name}</h1>
+
+      <p class="hero-statement">{hero.statement}</p>
+
+      <div class="hero-body">
+        <p class="hero-intro">{hero.intro}</p>
+
+        <div class="btn-row hero-actions">
+          <a href="/writeups" class="button">
+            Read the writing <span class="arrow" aria-hidden="true">&rarr;</span>
+          </a>
+          <a href="/about" class="button button--ghost">About me</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <dl class="facts">
+        {
+          hero.facts.map((fact) => (
+            <div class="fact">
+              <dt class="label">{fact.label}</dt>
+              <dd>{fact.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- ================= Focus areas ================= -->
+  <section class="section section--band">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <p class="label">What I work on</p>
+        <div>
+          <h2>Three problems, in roughly this order</h2>
+          <p>
+            Most of what I do reduces to these. They are listed in the order I
+            usually find them, not the order people expect.
+          </p>
+        </div>
+      </div>
+
+      <div class="index" data-reveal>
+        {
+          focusAreas.map((area, i) => (
+            <article class="index-item">
+              <span class="index-num">{String(i + 1).padStart(2, '0')}</span>
+              <h3>{area.title}</h3>
+              <p>{area.body}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Selected writing ================= -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <p class="label">Selected writing</p>
+        <div>
+          <h2>Recent pieces</h2>
+          <p>
+            Longer than a post, shorter than a book, and aimed at people doing
+            this job rather than people describing it.
+          </p>
+        </div>
+      </div>
+
+      {
+        featured.length === 0 ? (
+          <p class="empty">The first piece is being written. Check back shortly.</p>
+        ) : (
+          <div class="card-grid" data-reveal>
+            {featured.map((a) => (
+              <a class="card" href={`/writeups/${a.slug}`}>
+                <div class="card-meta">
+                  <time class="label" datetime={a.publishedAt}>
+                    {formatDate(a.publishedAt)}
+                  </time>
+                  {a.tags[0] && (
+                    <>
+                      <span class="label" aria-hidden="true">
+                        ·
+                      </span>
+                      <span class="label">{a.tags[0]}</span>
+                    </>
+                  )}
+                </div>
+                <h3>{a.title}</h3>
+                <p>{a.description}</p>
+                <span class="card-foot label">
+                  {a.readingMinutes} min read <span class="arrow" aria-hidden="true">&rarr;</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        articles.length > featured.length && (
+          <p class="all-link">
+            <a href="/writeups" class="more-link">
+              All {articles.length} writeups <span class="arrow" aria-hidden="true">&rarr;</span>
+            </a>
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- ================= Closing ================= -->
+  <section class="section section--tight">
+    <div class="container">
+      <div class="callout" data-reveal>
+        <div>
+          <h2>{closing.heading}</h2>
+          <p>{closing.body}</p>
+        </div>
+        <div class="btn-row">
+          <a href="/contact" class="button">
+            Get in touch <span class="arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ---- Hero ---- */
+  .hero {
+    padding-block: clamp(3.5rem, 10vw, 7rem) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .hero-eyebrow {
+    margin: 0 0 1.5rem;
+  }
+
+  /* The name stays the h1 for entity clarity, but visually it is the
+     smaller line — the statement below it carries the page. */
+  .hero-name {
+    font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-family: var(--font-sans);
+    color: var(--ink);
+    margin: 0 0 1.6rem;
+  }
+
+  .hero-statement {
+    font-size: clamp(2rem, 1.35rem + 3vw, 4rem);
+    line-height: 1.1;
+    letter-spacing: -0.026em;
+    font-weight: 600;
+    color: var(--ink);
+    max-width: 17ch;
+    text-wrap: balance;
+    margin: 0 0 clamp(2rem, 5vw, 3.25rem);
+  }
+
+  .hero-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2.5rem 4rem;
+    align-items: end;
+    padding-bottom: clamp(2.5rem, 6vw, 4rem);
+  }
+  @media (max-width: 56rem) {
+    .hero-body {
+      grid-template-columns: 1fr;
+      align-items: start;
+      gap: 2rem;
+    }
+  }
+
+  .hero-intro {
+    margin: 0;
+    max-width: 54ch;
+    font-size: var(--step-1);
+    line-height: 1.62;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  .hero-actions {
+    flex: none;
+  }
+
+  /* ---- Facts strip ---- */
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    margin: 0;
+    border-top: 1px solid var(--rule);
+  }
+  @media (max-width: 40rem) {
+    .facts {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .fact {
+    padding: 1.4rem 1.5rem 1.5rem 0;
+    border-right: 1px solid var(--rule);
+  }
+  .fact:last-child {
+    border-right: 0;
+  }
+  @media (min-width: 40rem) {
+    .fact + .fact {
+      padding-left: 1.5rem;
+    }
+  }
+  @media (max-width: 40rem) {
+    .fact {
+      border-right: 0;
+      border-bottom: 1px solid var(--rule);
+      padding: 1rem 0;
+    }
+    .fact:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .fact dt {
+    margin-bottom: 0.35rem;
+  }
+  .fact dd {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    color: var(--ink);
+  }
+
+  /* ---- Writing ---- */
+  .all-link {
+    margin: 2.5rem 0 0;
+  }
+
+  .empty {
+    padding-block: 2rem;
+    color: var(--muted);
+  }
+</style>

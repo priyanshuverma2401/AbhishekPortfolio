@@ -1,0 +1,251 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../site.config';
+
+const description = `Get in touch with ${site.name} — speaking, advisory conversations, hiring, and correspondence about the writing.`;
+
+const jsonLd = [
+  {
+    '@type': 'ContactPage',
+    '@id': `${site.url}/contact#page`,
+    url: `${site.url}/contact`,
+    name: `Contact ${site.name}`,
+    description,
+    inLanguage: site.lang,
+    isPartOf: { '@id': `${site.url}/#website` },
+    mainEntity: { '@id': `${site.url}/#person` },
+  },
+  {
+    '@type': 'BreadcrumbList',
+    '@id': `${site.url}/contact#breadcrumbs`,
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${site.url}/` },
+      { '@type': 'ListItem', position: 2, name: 'Contact', item: `${site.url}/contact` },
+    ],
+  },
+];
+
+const channels = [
+  {
+    label: 'Email',
+    value: site.email,
+    href: `mailto:${site.email}`,
+    note: 'Best for anything substantive. I read everything and reply to most within a week.',
+  },
+  {
+    label: 'LinkedIn',
+    value: 'Connect or message',
+    href: site.linkedin,
+    note: 'Fine for introductions and shorter notes. Please include context in the request itself.',
+    external: true,
+  },
+];
+
+const yes = [
+  'Speaking on engineering leadership, organisational design and platform strategy.',
+  'Advisory conversations with founders and engineering leaders.',
+  'Correspondence about something I have written here — including disagreement.',
+  'Introductions to people working on genuinely hard organisational problems.',
+];
+
+const no = [
+  'Unsolicited vendor pitches and generic partnership outreach.',
+  'Requests to review, promote or endorse products I have not used.',
+  'Anything that begins by telling me what my own priorities are.',
+];
+---
+
+<BaseLayout title="Contact" description={description} path="/contact" jsonLd={jsonLd}>
+  <!-- ================= Hero ================= -->
+  <section class="page-hero">
+    <div class="container">
+      <p class="label">Contact</p>
+      <h1>Get in touch</h1>
+      <p class="lede">
+        I am glad to hear from people working on the same problems. A line of
+        context about who you are and what you are after will get a faster and
+        more useful reply than a calendar invitation.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= Channels ================= -->
+  <section class="section section--tight">
+    <div class="container">
+      <div class="card-grid" data-reveal>
+        {
+          channels.map((c) => (
+            <a
+              class="card channel"
+              href={c.href}
+              rel={c.external ? 'noopener' : undefined}
+              target={c.external ? '_blank' : undefined}
+            >
+              <span class="label">{c.label}</span>
+              <h2 class="channel-value">{c.value}</h2>
+              <p>{c.note}</p>
+              <span class="card-foot label">
+                Open <span class="arrow" aria-hidden="true">&rarr;</span>
+              </span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Yes / no ================= -->
+  <section class="section section--band">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <p class="label">Before you write</p>
+        <div>
+          <h2>What tends to get a reply</h2>
+          <p>
+            Not a set of rules so much as an honest account of where my
+            attention actually goes.
+          </p>
+        </div>
+      </div>
+
+      <div class="split" data-reveal>
+        <div class="split-col">
+          <p class="label split-title split-title--yes">Usually yes</p>
+          <ul class="ticks">
+            {yes.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+        <div class="split-col">
+          <p class="label split-title split-title--no">Usually no</p>
+          <ul class="ticks ticks--no">
+            {no.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Note ================= -->
+  <section class="section section--tight">
+    <div class="container">
+      <div class="callout" data-reveal>
+        <div>
+          <h2>On response times</h2>
+          <p>
+            I answer mail in batches rather than continuously. If something is
+            genuinely time-sensitive, say so in the subject line and I will move
+            it forward.
+          </p>
+        </div>
+        <div class="btn-row">
+          <a href={`mailto:${site.email}`} class="button">
+            Write to me <span class="arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-block: clamp(3rem, 8vw, 5rem) clamp(2rem, 5vw, 3rem);
+    border-bottom: 1px solid var(--rule);
+  }
+  .page-hero h1 {
+    margin: 0.75rem 0 1.1rem;
+  }
+  .page-hero .lede {
+    max-width: 52ch;
+  }
+
+  /* ---- Channel cards ---- */
+  .channel-value {
+    font-size: var(--step-1);
+    line-height: 1.3;
+    color: var(--ink);
+    margin: 0;
+    word-break: break-word;
+    transition: color 140ms ease;
+  }
+  .channel:hover .channel-value {
+    color: var(--accent);
+  }
+
+  /* ---- Yes / no ---- */
+  .split {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    border-top: 1px solid var(--rule-firm);
+  }
+  @media (max-width: 52rem) {
+    .split {
+      grid-template-columns: 1fr;
+    }
+  }
+  .split-col {
+    padding: 1.85rem 2rem 2rem 0;
+    border-right: 1px solid var(--rule);
+  }
+  .split-col:last-child {
+    border-right: 0;
+    padding-right: 0;
+  }
+  @media (min-width: 52rem) {
+    .split-col + .split-col {
+      padding-left: 2rem;
+    }
+  }
+  @media (max-width: 52rem) {
+    .split-col {
+      border-right: 0;
+      border-bottom: 1px solid var(--rule);
+      padding: 1.6rem 0;
+    }
+    .split-col:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .split-title {
+    margin: 0 0 1.1rem;
+  }
+  .split-title--yes {
+    color: var(--accent);
+  }
+
+  .ticks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ticks li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.85rem;
+    color: var(--ink-soft);
+    font-size: 0.99rem;
+    line-height: 1.65;
+    max-width: 44ch;
+    text-wrap: pretty;
+  }
+  .ticks li:last-child {
+    margin-bottom: 0;
+  }
+  .ticks li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 0.5rem;
+    height: 1px;
+    background: var(--accent);
+  }
+  .ticks--no li {
+    color: var(--muted);
+  }
+  .ticks--no li::before {
+    background: var(--rule-firm);
+  }
+</style>

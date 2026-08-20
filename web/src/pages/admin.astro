@@ -1,0 +1,926 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import { site } from '../site.config';
+import '../styles/global.css';
+
+// In `astro dev` always talk to the local API, so site.config.ts can keep the
+// production Render URL and never needs editing to work locally.
+const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title="Editor" description="Private editor." path="/admin" noindex />
+  </head>
+  <body class="admin" data-api={apiBase}>
+    <header class="bar">
+      <div class="bar-left">
+        <a href="/" class="bar-home">&larr; Site</a>
+        <span class="bar-title">Editor</span>
+      </div>
+      <div class="bar-right">
+        <span id="status" class="status" role="status" aria-live="polite"></span>
+        <button type="button" id="btn-new" class="btn">New</button>
+        <button type="button" id="btn-draft" class="btn">Save draft</button>
+        <button type="button" id="btn-publish" class="btn btn-primary">Publish</button>
+      </div>
+    </header>
+
+    <div class="shell">
+      <!-- ---------------- Sidebar: existing pieces ---------------- -->
+      <aside class="sidebar">
+        <p class="label side-label">Writeups</p>
+        <ul id="list" class="list"></ul>
+      </aside>
+
+      <!-- ---------------- Editor ---------------- -->
+      <main class="editor">
+        <input id="f-title" class="title-input" type="text" placeholder="Title" autocomplete="off" />
+
+        <div class="meta-grid">
+          <label class="field">
+            <span class="label">URL slug</span>
+            <input id="f-slug" type="text" autocomplete="off" placeholder="auto-generated-from-title" />
+            <span class="hint" id="slug-preview"></span>
+          </label>
+
+          <label class="field">
+            <span class="label">Tags <span class="hint-inline">comma separated</span></span>
+            <input id="f-tags" type="text" autocomplete="off" placeholder="Engineering Leadership, Strategy" />
+          </label>
+        </div>
+
+        <label class="field">
+          <span class="label">Meta description <span class="hint-inline" id="desc-count"></span></span>
+          <textarea id="f-desc" rows="2" placeholder="The summary Google shows under your title. Aim for 140-160 characters."></textarea>
+        </label>
+
+        <div class="field">
+          <span class="label">Cover image</span>
+          <div class="cover-row">
+            <button type="button" id="btn-cover" class="btn">Upload cover</button>
+            <button type="button" id="btn-cover-clear" class="btn btn-quiet">Remove</button>
+            <span class="hint" id="cover-name">None</span>
+          </div>
+          <div id="cover-preview" class="cover-preview" hidden></div>
+        </div>
+
+        <!-- ---------------- Body ---------------- -->
+        <div class="field body-field">
+          <div class="toolbar" role="toolbar" aria-label="Formatting">
+            <button type="button" data-cmd="formatBlock" data-arg="h2" title="Heading 2">H2</button>
+            <button type="button" data-cmd="formatBlock" data-arg="h3" title="Heading 3">H3</button>
+            <button type="button" data-cmd="formatBlock" data-arg="p" title="Paragraph">&para;</button>
+            <span class="tb-sep" aria-hidden="true"></span>
+            <button type="button" data-cmd="bold" title="Bold (Ctrl+B)"><strong>B</strong></button>
+            <button type="button" data-cmd="italic" title="Italic (Ctrl+I)"><em>I</em></button>
+            <span class="tb-sep" aria-hidden="true"></span>
+            <button type="button" data-cmd="formatBlock" data-arg="blockquote" title="Quote">&ldquo;</button>
+            <button type="button" data-cmd="insertUnorderedList" title="Bulleted list">&bull;</button>
+            <button type="button" data-cmd="insertOrderedList" title="Numbered list">1.</button>
+            <span class="tb-sep" aria-hidden="true"></span>
+            <button type="button" id="tb-link" title="Link (Ctrl+K)">Link</button>
+            <button type="button" id="tb-image" title="Insert image">Image</button>
+            <button type="button" data-cmd="insertHorizontalRule" title="Divider">&mdash;</button>
+            <span class="tb-sep" aria-hidden="true"></span>
+            <button type="button" data-cmd="removeFormat" title="Clear formatting">Clear</button>
+            <span class="tb-spacer"></span>
+            <span class="hint" id="wordcount"></span>
+          </div>
+
+          <div
+            id="body"
+            class="prose body"
+            contenteditable="true"
+            spellcheck="true"
+            aria-label="Article body"
+            data-placeholder="Start writing..."
+          >
+          </div>
+        </div>
+
+        <!-- ---------------- SERP preview ---------------- -->
+        <section class="serp">
+          <p class="label">Google result preview</p>
+          <div class="serp-card">
+            <p class="serp-url" id="serp-url"></p>
+            <p class="serp-title" id="serp-title">Title</p>
+            <p class="serp-desc" id="serp-desc">Meta description</p>
+          </div>
+        </section>
+
+        <div class="danger">
+          <button type="button" id="btn-delete" class="btn btn-danger">Delete this writeup</button>
+        </div>
+      </main>
+    </div>
+
+    <input type="file" id="file-input" accept="image/*" hidden />
+
+    <script>
+      // ====================================================================
+      // Admin editor. Pure client-side; all persistence goes through the
+      // Render API declared on <body data-api>. Public pages never load this.
+      // ====================================================================
+      const API = document.body.dataset.api;
+      const SITE_ORIGIN = location.origin;
+
+      const $ = (id) => document.getElementById(id);
+      const els = {
+        title: $('f-title'),
+        slug: $('f-slug'),
+        desc: $('f-desc'),
+        tags: $('f-tags'),
+        body: $('body'),
+        list: $('list'),
+        status: $('status'),
+        descCount: $('desc-count'),
+        slugPreview: $('slug-preview'),
+        wordcount: $('wordcount'),
+        coverName: $('cover-name'),
+        coverPreview: $('cover-preview'),
+        serpUrl: $('serp-url'),
+        serpTitle: $('serp-title'),
+        serpDesc: $('serp-desc'),
+        fileInput: $('file-input'),
+      };
+
+      /** Current document being edited. `_id` is null for an unsaved piece. */
+      let current = blank();
+      let slugTouched = false;
+      let pendingImageTarget = 'body'; // 'body' | 'cover'
+
+      function blank() {
+        return {
+          _id: null,
+          title: '',
+          slug: '',
+          description: '',
+          tags: [],
+          html: '',
+          coverImage: null,
+          status: 'draft',
+        };
+      }
+
+      // ---- helpers -------------------------------------------------------
+      function say(msg, kind) {
+        els.status.textContent = msg;
+        els.status.className = 'status ' + (kind || '');
+        if (msg && kind !== 'busy') {
+          setTimeout(() => {
+            if (els.status.textContent === msg) els.status.textContent = '';
+          }, 4000);
+        }
+      }
+
+      function slugify(s) {
+        return s
+          .toLowerCase()
+          .trim()
+          .replace(/[‘’']/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 80);
+      }
+
+      function escapeHtml(s) {
+        return s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+      }
+
+      async function api(path, options) {
+        const res = await fetch(API + path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, options || {}));
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error((res.status + ' ' + res.statusText + ' ' + text).trim());
+        }
+        return res.status === 204 ? null : res.json();
+      }
+
+      // ---- live derived fields --------------------------------------------
+      function refreshDerived() {
+        const slug = els.slug.value || slugify(els.title.value);
+        els.slugPreview.textContent = slug ? SITE_ORIGIN + '/writeups/' + slug : '';
+
+        const d = els.desc.value;
+        els.descCount.textContent = d.length + ' / 160';
+        els.descCount.className = 'hint-inline' + (d.length > 160 ? ' over' : d.length >= 140 ? ' good' : '');
+
+        const words = els.body.innerText.trim().split(/\s+/).filter(Boolean).length;
+        els.wordcount.textContent = words ? words + ' words · ' + Math.max(1, Math.round(words / 220)) + ' min' : '';
+
+        els.serpUrl.textContent = SITE_ORIGIN.replace(/^https?:\/\//, '') + ' › writeups › ' + (slug || '...');
+        els.serpTitle.textContent = els.title.value || 'Title';
+        els.serpDesc.textContent = d || 'Meta description';
+      }
+
+      // ---- list ------------------------------------------------------------
+      async function loadList() {
+        try {
+          const items = await api('/api/articles');
+          els.list.innerHTML = '';
+          if (!items.length) {
+            const li = document.createElement('li');
+            li.className = 'list-empty';
+            li.textContent = 'Nothing yet.';
+            els.list.appendChild(li);
+            return;
+          }
+          for (const it of items) {
+            const li = document.createElement('li');
+            li.className = 'list-item' + (it._id === current._id ? ' is-current' : '');
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+
+            const t = document.createElement('span');
+            t.className = 'li-title';
+            t.textContent = it.title || 'Untitled';
+
+            const meta = document.createElement('span');
+            meta.className = 'label li-meta';
+            const dot = document.createElement('span');
+            dot.className = 'dot ' + it.status;
+            meta.appendChild(dot);
+            meta.appendChild(document.createTextNode(it.status));
+
+            btn.appendChild(t);
+            btn.appendChild(meta);
+            btn.addEventListener('click', () => load(it._id));
+            li.appendChild(btn);
+            els.list.appendChild(li);
+          }
+        } catch (err) {
+          els.list.innerHTML = '';
+          const li = document.createElement('li');
+          li.className = 'list-empty';
+          li.textContent = 'Could not reach the API.';
+          els.list.appendChild(li);
+          say('API unreachable — is the Render service awake?', 'bad');
+          console.error(err);
+        }
+      }
+
+      async function load(id) {
+        say('Loading...', 'busy');
+        try {
+          const doc = await api('/api/articles/' + id);
+          current = doc;
+          slugTouched = true;
+          els.title.value = doc.title || '';
+          els.slug.value = doc.slug || '';
+          els.desc.value = doc.description || '';
+          els.tags.value = (doc.tags || []).join(', ');
+          els.body.innerHTML = doc.html || '';
+          setCover(doc.coverImage || null);
+          refreshDerived();
+          say('');
+          loadList();
+          window.scrollTo({ top: 0 });
+        } catch (err) {
+          say('Could not load that piece.', 'bad');
+          console.error(err);
+        }
+      }
+
+      function newDoc() {
+        current = blank();
+        slugTouched = false;
+        els.title.value = '';
+        els.slug.value = '';
+        els.desc.value = '';
+        els.tags.value = '';
+        els.body.innerHTML = '';
+        setCover(null);
+        refreshDerived();
+        loadList();
+        els.title.focus();
+      }
+
+      function setCover(cover) {
+        current.coverImage = cover;
+        els.coverName.textContent = cover ? cover.alt || 'Cover set' : 'None';
+        els.coverPreview.hidden = !cover;
+        els.coverPreview.innerHTML = '';
+        if (cover) {
+          const img = document.createElement('img');
+          img.src = cover.url;
+          img.alt = cover.alt || '';
+          els.coverPreview.appendChild(img);
+        }
+      }
+
+      // ---- save -------------------------------------------------------------
+      function collect(status) {
+        return {
+          title: els.title.value.trim(),
+          slug: els.slug.value.trim() || slugify(els.title.value),
+          description: els.desc.value.trim(),
+          tags: els.tags.value
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean),
+          html: els.body.innerHTML.trim(),
+          coverImage: current.coverImage,
+          status: status,
+        };
+      }
+
+      async function save(status) {
+        const payload = collect(status);
+        if (!payload.title) return say('A title is required.', 'bad');
+        if (!payload.slug) return say('A slug is required.', 'bad');
+        if (status === 'published' && !payload.description) {
+          return say('Add a meta description before publishing — Google needs it.', 'bad');
+        }
+
+        say(status === 'published' ? 'Publishing...' : 'Saving...', 'busy');
+        try {
+          const saved = current._id
+            ? await api('/api/articles/' + current._id, { method: 'PUT', body: JSON.stringify(payload) })
+            : await api('/api/articles', { method: 'POST', body: JSON.stringify(payload) });
+
+          current = saved;
+          els.slug.value = saved.slug;
+          refreshDerived();
+          await loadList();
+
+          if (status === 'published') {
+            say('Published. Rebuilding the site...', 'busy');
+            try {
+              await api('/api/deploy', { method: 'POST' });
+              say('Published. The site rebuilds in about a minute.', 'good');
+            } catch (e) {
+              say('Saved and published, but the rebuild hook did not fire.', 'bad');
+            }
+          } else {
+            say('Draft saved.', 'good');
+          }
+        } catch (err) {
+          say('Save failed: ' + err.message, 'bad');
+          console.error(err);
+        }
+      }
+
+      async function remove() {
+        if (!current._id) return say('Nothing saved to delete.', 'bad');
+        if (!confirm('Delete "' + current.title + '" permanently? This cannot be undone.')) return;
+        say('Deleting...', 'busy');
+        try {
+          await api('/api/articles/' + current._id, { method: 'DELETE' });
+          newDoc();
+          say('Deleted.', 'good');
+        } catch (err) {
+          say('Delete failed: ' + err.message, 'bad');
+        }
+      }
+
+      // ---- rich text ---------------------------------------------------------
+      function exec(cmd, arg) {
+        els.body.focus();
+        document.execCommand(cmd, false, arg);
+        refreshDerived();
+      }
+
+      document.querySelectorAll('.toolbar button[data-cmd]').forEach((btn) => {
+        // mousedown, not click - keeps the selection inside the editor alive.
+        btn.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          exec(btn.dataset.cmd, btn.dataset.arg);
+        });
+      });
+
+      $('tb-link').addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed) return say('Select the text you want to link first.', 'bad');
+        const url = prompt('Link URL', 'https://');
+        if (url) exec('createLink', url);
+      });
+
+      $('tb-image').addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        pendingImageTarget = 'body';
+        els.fileInput.click();
+      });
+
+      $('btn-cover').addEventListener('click', () => {
+        pendingImageTarget = 'cover';
+        els.fileInput.click();
+      });
+      $('btn-cover-clear').addEventListener('click', () => setCover(null));
+
+      els.fileInput.addEventListener('change', async () => {
+        const file = els.fileInput.files && els.fileInput.files[0];
+        els.fileInput.value = '';
+        if (!file) return;
+
+        // Alt text is not optional here - it is both an accessibility
+        // requirement and one of the few image signals Google actually reads.
+        const alt = prompt('Describe this image (alt text — used by Google and screen readers)');
+        if (alt === null) return;
+        if (!alt.trim()) return say('Alt text is required.', 'bad');
+
+        say('Uploading image...', 'busy');
+        try {
+          const form = new FormData();
+          form.append('image', file);
+          const res = await fetch(API + '/api/upload', { method: 'POST', body: form });
+          if (!res.ok) throw new Error(await res.text());
+          const img = await res.json();
+
+          if (pendingImageTarget === 'cover') {
+            setCover({ url: img.url, alt: alt.trim(), width: img.width, height: img.height });
+          } else {
+            const figure =
+              '<figure><img src="' +
+              escapeHtml(img.url) +
+              '" alt="' +
+              escapeHtml(alt.trim()) +
+              '" width="' +
+              img.width +
+              '" height="' +
+              img.height +
+              '" loading="lazy" decoding="async">' +
+              '<figcaption>Caption (optional — edit or delete this line)</figcaption></figure><p><br></p>';
+            els.body.focus();
+            document.execCommand('insertHTML', false, figure);
+          }
+          say('Image added.', 'good');
+          refreshDerived();
+        } catch (err) {
+          say('Upload failed: ' + err.message, 'bad');
+          console.error(err);
+        }
+      });
+
+      // Paste as clean text. Anything pasted from Word or Docs otherwise drags
+      // in inline styles and spans that wreck the article typography.
+      els.body.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+        const blocks = text
+          .split(/\n{2,}/)
+          .map((b) => b.trim())
+          .filter(Boolean);
+        if (blocks.length > 1) {
+          const html = blocks.map((b) => '<p>' + escapeHtml(b).replace(/\n/g, '<br>') + '</p>').join('');
+          document.execCommand('insertHTML', false, html);
+        } else {
+          document.execCommand('insertText', false, text);
+        }
+        refreshDerived();
+      });
+
+      els.body.addEventListener('keydown', (e) => {
+        const mod = e.metaKey || e.ctrlKey;
+        if (mod && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          $('tb-link').dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        }
+        if (mod && e.key.toLowerCase() === 's') {
+          e.preventDefault();
+          save('draft');
+        }
+      });
+
+      // ---- wiring -------------------------------------------------------------
+      els.title.addEventListener('input', () => {
+        if (!slugTouched) els.slug.value = slugify(els.title.value);
+        refreshDerived();
+      });
+      els.slug.addEventListener('input', () => {
+        slugTouched = true;
+        refreshDerived();
+      });
+      els.desc.addEventListener('input', refreshDerived);
+      els.body.addEventListener('input', refreshDerived);
+
+      $('btn-new').addEventListener('click', newDoc);
+      $('btn-draft').addEventListener('click', () => save('draft'));
+      $('btn-publish').addEventListener('click', () => save('published'));
+      $('btn-delete').addEventListener('click', remove);
+
+      window.addEventListener('beforeunload', (e) => {
+        if (els.title.value || els.body.innerHTML) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      });
+
+      refreshDerived();
+      loadList();
+    </script>
+
+    <style>
+      body.admin {
+        font-family: var(--font-sans);
+        display: block;
+        background: var(--paper);
+      }
+
+      /* ---- top bar ---- */
+      .bar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 0.7rem clamp(1rem, 3vw, 1.75rem);
+        background: var(--paper);
+        border-bottom: 1px solid var(--rule-firm);
+      }
+      .bar-left {
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+      }
+      .bar-home {
+        font-size: 0.82rem;
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .bar-home:hover {
+        color: var(--accent);
+      }
+      .bar-title {
+        font-family: var(--font-serif);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .bar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        flex-wrap: wrap;
+      }
+
+      .status {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-right: 0.4rem;
+      }
+      .status.good {
+        color: #2e6b4f;
+      }
+      .status.bad {
+        color: #a03028;
+      }
+
+      .btn {
+        font-family: var(--font-sans);
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 0.45rem 0.85rem;
+        background: var(--surface);
+        color: var(--ink-soft);
+        border: 1px solid var(--rule-firm);
+        border-radius: 2px;
+        cursor: pointer;
+      }
+      .btn:hover {
+        border-color: var(--ink-soft);
+        color: var(--ink);
+      }
+      .btn-primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--accent-ink);
+        border-color: var(--accent-ink);
+        color: #fff;
+      }
+      .btn-quiet {
+        color: var(--muted);
+      }
+      .btn-danger {
+        color: #a03028;
+        border-color: color-mix(in srgb, #a03028 35%, transparent);
+      }
+      .btn-danger:hover {
+        background: #a03028;
+        border-color: #a03028;
+        color: #fff;
+      }
+
+      /* ---- shell ---- */
+      .shell {
+        display: grid;
+        grid-template-columns: 15rem minmax(0, 1fr);
+        align-items: start;
+        min-height: calc(100vh - 3.4rem);
+      }
+      @media (max-width: 56rem) {
+        .shell {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 3.4rem;
+        padding: 1.5rem 1.25rem;
+        border-right: 1px solid var(--rule);
+        max-height: calc(100vh - 3.4rem);
+        overflow-y: auto;
+      }
+      @media (max-width: 56rem) {
+        .sidebar {
+          position: static;
+          max-height: none;
+          border-right: 0;
+          border-bottom: 1px solid var(--rule);
+        }
+      }
+      .side-label {
+        margin: 0 0 0.85rem;
+      }
+      .list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .list-item + .list-item {
+        border-top: 1px solid var(--rule);
+      }
+      .list-item button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 0.7rem 0;
+        background: none;
+        border: 0;
+        cursor: pointer;
+      }
+      .li-title {
+        display: block;
+        font-family: var(--font-serif);
+        font-size: 0.95rem;
+        color: var(--ink-soft);
+        line-height: 1.4;
+        margin-bottom: 0.3rem;
+      }
+      .list-item button:hover .li-title {
+        color: var(--accent);
+      }
+      .is-current .li-title {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .li-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--rule-firm);
+      }
+      .dot.published {
+        background: #3f8a63;
+      }
+      .dot.draft {
+        background: #c9a227;
+      }
+      .list-empty {
+        font-size: 0.85rem;
+        color: var(--muted);
+        padding: 0.5rem 0;
+      }
+
+      /* ---- editor ---- */
+      .editor {
+        padding: clamp(1.5rem, 4vw, 2.75rem) clamp(1rem, 4vw, 3rem) 5rem;
+        max-width: 52rem;
+        width: 100%;
+      }
+
+      .title-input {
+        width: 100%;
+        font-family: var(--font-serif);
+        font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.4rem);
+        font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        background: none;
+        border: 0;
+        border-bottom: 1px solid var(--rule);
+        padding: 0 0 0.7rem;
+        margin-bottom: 1.75rem;
+      }
+      .title-input::placeholder {
+        color: var(--rule-firm);
+      }
+      .title-input:focus {
+        outline: none;
+        border-bottom-color: var(--accent);
+      }
+
+      .field {
+        display: block;
+        margin-bottom: 1.4rem;
+      }
+      .field > .label {
+        display: block;
+        margin-bottom: 0.4rem;
+      }
+      .meta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.4rem;
+      }
+      @media (max-width: 40rem) {
+        .meta-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .field input[type='text'],
+      .field textarea {
+        width: 100%;
+        font-family: var(--font-sans);
+        font-size: 0.92rem;
+        color: var(--ink);
+        background: var(--surface);
+        border: 1px solid var(--rule-firm);
+        border-radius: 2px;
+        padding: 0.5rem 0.65rem;
+        line-height: 1.5;
+        resize: vertical;
+      }
+      .field input:focus,
+      .field textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+
+      .hint {
+        display: block;
+        margin-top: 0.35rem;
+        font-size: 0.75rem;
+        color: var(--muted);
+        word-break: break-all;
+      }
+      .hint-inline {
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        text-transform: none;
+      }
+      .hint-inline.good {
+        color: #3f8a63;
+      }
+      .hint-inline.over {
+        color: #a03028;
+      }
+
+      .cover-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+      .cover-row .hint {
+        margin-top: 0;
+      }
+      .cover-preview {
+        margin-top: 0.8rem;
+        max-width: 22rem;
+      }
+      .cover-preview img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid var(--rule);
+      }
+
+      /* ---- toolbar + body ---- */
+      .body-field {
+        margin-top: 2rem;
+      }
+      .toolbar {
+        position: sticky;
+        top: 3.4rem;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 0.15rem;
+        flex-wrap: wrap;
+        padding: 0.4rem 0.5rem;
+        background: var(--paper);
+        border: 1px solid var(--rule-firm);
+        border-bottom: 0;
+      }
+      .toolbar button {
+        min-width: 2rem;
+        height: 1.9rem;
+        padding: 0 0.5rem;
+        font-family: var(--font-sans);
+        font-size: 0.78rem;
+        background: none;
+        border: 0;
+        border-radius: 2px;
+        color: var(--ink-soft);
+        cursor: pointer;
+      }
+      .toolbar button:hover {
+        background: var(--rule);
+        color: var(--ink);
+      }
+      .tb-sep {
+        width: 1px;
+        height: 1.1rem;
+        background: var(--rule-firm);
+        margin: 0 0.35rem;
+      }
+      .tb-spacer {
+        flex: 1;
+      }
+      .toolbar .hint {
+        margin: 0;
+        padding-right: 0.3rem;
+        white-space: nowrap;
+      }
+
+      .body {
+        max-width: none;
+        min-height: 26rem;
+        padding: 1.75rem clamp(1rem, 3vw, 2rem);
+        background: var(--surface);
+        border: 1px solid var(--rule-firm);
+      }
+      .body:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+      .body:empty::before {
+        content: attr(data-placeholder);
+        color: var(--rule-firm);
+      }
+      .body figcaption {
+        cursor: text;
+      }
+
+      /* ---- SERP preview ---- */
+      .serp {
+        margin-top: 2.5rem;
+      }
+      .serp-card {
+        margin-top: 0.7rem;
+        padding: 1rem 1.15rem;
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        max-width: 37rem;
+      }
+      .serp-card p {
+        margin: 0;
+        font-family: arial, sans-serif;
+      }
+      .serp-url {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-bottom: 0.25rem !important;
+      }
+      .serp-title {
+        font-size: 1.15rem;
+        line-height: 1.3;
+        color: #1a0dab;
+        margin-bottom: 0.2rem !important;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+      }
+      .serp-desc {
+        font-size: 0.85rem;
+        line-height: 1.45;
+        color: var(--ink-soft);
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) .serp-title {
+          color: #8ab4f8;
+        }
+      }
+
+      .danger {
+        margin-top: 3.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--rule);
+      }
+    </style>
+  </body>
+</html>

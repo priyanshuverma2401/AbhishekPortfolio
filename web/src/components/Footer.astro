@@ -1,0 +1,222 @@
+---
+import { site, nav } from '../site.config';
+
+const year = new Date().getFullYear();
+const roleLine = [site.jobTitle, site.company].filter(Boolean).join(', ');
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <!-- ---- Masthead ---- -->
+    <div class="foot-top">
+      <div class="foot-identity">
+        <p class="foot-name">{site.name}</p>
+        {roleLine && <p class="label foot-role">{roleLine}</p>}
+        <p class="foot-blurb">{site.tagline}</p>
+      </div>
+
+      <div class="foot-cta">
+        <p class="label">Elsewhere</p>
+        <a href={site.linkedin} rel="me noopener" target="_blank" class="social">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="currentColor">
+            <path
+              d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.71h.05c.53-.95 1.83-1.96 3.77-1.96 4.03 0 4.78 2.5 4.78 5.76V21h-4v-5.6c0-1.34-.03-3.06-1.9-3.06-1.9 0-2.2 1.45-2.2 2.96V21H9z"
+            ></path>
+          </svg>
+          <span>LinkedIn</span>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+        </a>
+        <a href={`mailto:${site.email}`} class="social">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="2.5" y="4.5" width="19" height="15" rx="1.5"></rect>
+            <path d="m3 6 9 6.5L21 6"></path>
+          </svg>
+          <span>Email</span>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ---- Link columns ---- -->
+    <div class="foot-cols">
+      <nav class="foot-col" aria-label="Footer navigation">
+        <p class="label">Site</p>
+        <ul>
+          <li><a href="/">Home</a></li>
+          {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+        </ul>
+      </nav>
+
+      <div class="foot-col">
+        <p class="label">Follow</p>
+        <ul>
+          <li><a href="/rss.xml">RSS feed</a></li>
+          <li><a href={site.linkedin} rel="me noopener" target="_blank">LinkedIn</a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col foot-col--wide">
+        <p class="label">Colophon</p>
+        <p class="foot-note">
+          Built with Astro and served as static HTML. Set in Source Serif 4 and
+          Inter. No trackers, no cookie banner, no newsletter popup.
+        </p>
+      </div>
+    </div>
+
+    <!-- ---- Base ---- -->
+    <div class="foot-base">
+      <p>&copy; {year} {site.name}. All rights reserved.</p>
+      <p>Views expressed here are my own.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: clamp(3rem, 8vw, 6rem);
+    border-top: 1px solid var(--rule-firm);
+    padding-block: clamp(3rem, 7vw, 4.5rem) 2rem;
+    background: var(--paper);
+  }
+
+  /* ---- Masthead ---- */
+  .foot-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2.5rem 4rem;
+    align-items: start;
+    padding-bottom: clamp(2.5rem, 5vw, 3.5rem);
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (max-width: 52rem) {
+    .foot-top {
+      grid-template-columns: 1fr;
+      gap: 2.25rem;
+    }
+  }
+
+  .foot-name {
+    font-family: var(--font-serif);
+    font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.4rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0 0 0.4rem;
+    line-height: 1.1;
+  }
+  .foot-role {
+    margin: 0 0 1.1rem;
+  }
+  .foot-blurb {
+    margin: 0;
+    max-width: 44ch;
+    color: var(--muted);
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+
+  .foot-cta {
+    min-width: 12rem;
+  }
+  .foot-cta .label {
+    margin: 0 0 0.9rem;
+  }
+  .social {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding-block: 0.6rem;
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+  }
+  .social:first-of-type {
+    border-top: 1px solid var(--rule);
+  }
+  .social svg {
+    flex: none;
+    color: var(--muted);
+  }
+  .social .arrow {
+    margin-left: auto;
+    color: var(--rule-firm);
+    transition: transform 140ms ease, color 140ms ease;
+  }
+  .social:hover {
+    color: var(--accent);
+  }
+  .social:hover svg,
+  .social:hover .arrow {
+    color: var(--accent);
+  }
+  .social:hover .arrow {
+    transform: translateX(3px);
+  }
+
+  /* ---- Columns ---- */
+  .foot-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    padding-block: clamp(2.25rem, 5vw, 3rem);
+  }
+  @media (max-width: 52rem) {
+    .foot-cols {
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    .foot-col--wide {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .foot-col .label {
+    margin: 0 0 0.9rem;
+  }
+  .foot-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .foot-col a {
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .foot-col a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .foot-note {
+    margin: 0;
+    max-width: 42ch;
+    font-family: var(--font-sans);
+    font-size: 0.86rem;
+    line-height: 1.65;
+    color: var(--muted);
+  }
+
+  /* ---- Base ---- */
+  .foot-base {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+  }
+  .foot-base p {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+</style>

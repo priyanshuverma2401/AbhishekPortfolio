@@ -1,0 +1,118 @@
+---
+import { site, nav } from '../site.config';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrent = (href: string) => path === href || path.startsWith(href + '/');
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="wordmark" aria-label={`${site.name} — home`}>
+      <span class="wordmark-name">{site.name}</span>
+      <span class="wordmark-rule" aria-hidden="true"></span>
+      <span class="wordmark-role">{site.jobTitle}</span>
+    </a>
+
+    <nav aria-label="Primary">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-block: 1.15rem;
+    flex-wrap: wrap;
+  }
+
+  /* Name, hairline, role — reads as a masthead rather than a logo. */
+  .wordmark {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+    min-width: 0;
+  }
+  .wordmark-name {
+    font-family: var(--font-serif);
+    font-size: 1.16rem;
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .wordmark:hover .wordmark-name {
+    color: var(--accent);
+  }
+  .wordmark-rule {
+    width: 1.4rem;
+    height: 1px;
+    background: var(--rule-firm);
+    flex: none;
+  }
+  .wordmark-role {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  @media (max-width: 34rem) {
+    .wordmark-rule,
+    .wordmark-role {
+      display: none;
+    }
+  }
+
+  nav ul {
+    display: flex;
+    gap: clamp(1.25rem, 3vw, 2.25rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    padding-bottom: 3px;
+    border-bottom: 1px solid transparent;
+    transition: color 140ms ease, border-color 140ms ease;
+  }
+  nav a:hover {
+    color: var(--ink);
+  }
+  nav a[aria-current='page'] {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+</style>

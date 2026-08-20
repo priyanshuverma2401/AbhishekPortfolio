@@ -1,0 +1,187 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getArticles, type Article } from '../../lib/articles';
+import { formatDate } from '../../lib/format';
+import { site } from '../../site.config';
+
+export async function getStaticPaths() {
+  const articles = await getArticles();
+  return articles.map((article, i) => ({
+    params: { slug: article.slug },
+    props: {
+      article,
+      newer: articles[i - 1] ?? null,
+      older: articles[i + 1] ?? null,
+    },
+  }));
+}
+
+type Props = { article: Article; newer: Article | null; older: Article | null };
+const { article, newer, older } = Astro.props;
+const url = `${site.url}/writeups/${article.slug}`;
+
+const jsonLd = [
+  {
+    '@type': 'BlogPosting',
+    '@id': `${url}#article`,
+    headline: article.title,
+    description: article.description,
+    url,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    datePublished: article.publishedAt,
+    dateModified: article.updatedAt,
+    author: { '@id': `${site.url}/#person` },
+    publisher: { '@id': `${site.url}/#person` },
+    inLanguage: site.lang,
+    wordCount: article.html.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length,
+    keywords: article.tags.join(', '),
+    isPartOf: { '@id': `${site.url}/writeups#blog` },
+    ...(article.coverImage
+      ? { image: { '@type': 'ImageObject', url: article.coverImage.url, caption: article.coverImage.alt } }
+      : {}),
+  },
+  {
+    '@type': 'BreadcrumbList',
+    '@id': `${url}#breadcrumbs`,
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${site.url}/` },
+      { '@type': 'ListItem', position: 2, name: 'Writing', item: `${site.url}/writeups` },
+      { '@type': 'ListItem', position: 3, name: article.title, item: url },
+    ],
+  },
+];
+---
+<BaseLayout
+  title={article.title}
+  description={article.description}
+  path={`/writeups/${article.slug}`}
+  type="article"
+  ogImage={article.coverImage?.url ?? site.defaultOgImage}
+  publishedAt={article.publishedAt}
+  updatedAt={article.updatedAt}
+  tags={article.tags}
+  jsonLd={jsonLd}
+>
+  <article class="container">
+    <nav class="crumbs label" aria-label="Breadcrumb">
+      <a href="/writeups">Writing</a>
+    </nav>
+
+    <header class="article-head measure">
+      <h1>{article.title}</h1>
+      <p class="lede">{article.description}</p>
+      <p class="label byline">
+        <time datetime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
+        <span aria-hidden="true"> · </span>
+        {article.readingMinutes} min read
+        {article.tags.length > 0 && (
+          <>
+            <span aria-hidden="true"> · </span>
+            {article.tags.join(' · ')}
+          </>
+        )}
+      </p>
+    </header>
+
+    {article.coverImage && (
+      <figure class="cover">
+        <img
+          src={article.coverImage.url}
+          alt={article.coverImage.alt}
+          width={article.coverImage.width}
+          height={article.coverImage.height}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </figure>
+    )}
+
+    <div class="prose" set:html={article.html} />
+
+    {article.updatedAt !== article.publishedAt && (
+      <p class="label updated measure">
+        Last updated <time datetime={article.updatedAt}>{formatDate(article.updatedAt)}</time>
+      </p>
+    )}
+
+    {(newer || older) && (
+      <nav class="pager" aria-label="More writeups">
+        <div>
+          {older && (
+            <a href={`/writeups/${older.slug}`}>
+              <span class="label">Previous</span>
+              <span class="pager-title">{older.title}</span>
+            </a>
+          )}
+        </div>
+        <div class="pager-right">
+          {newer && (
+            <a href={`/writeups/${newer.slug}`}>
+              <span class="label">Next</span>
+              <span class="pager-title">{newer.title}</span>
+            </a>
+          )}
+        </div>
+      </nav>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .crumbs {
+    padding-block: 2.25rem 0;
+  }
+  .crumbs a { color: var(--muted); text-decoration: none; }
+  .crumbs a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 0.2em; }
+
+  .article-head {
+    padding-block: 1.5rem 2.25rem;
+  }
+  .article-head h1 { margin-bottom: 0.9rem; }
+  .article-head .lede { margin-bottom: 1.3rem; }
+  .byline { color: var(--muted); }
+
+  .cover {
+    margin: 0 0 2.75rem;
+    max-width: 52rem;
+  }
+  .cover img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+  }
+
+  .updated {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--rule-firm);
+  }
+  @media (max-width: 46rem) {
+    .pager { grid-template-columns: 1fr; gap: 1.5rem; }
+  }
+  .pager-right { text-align: right; }
+  @media (max-width: 46rem) {
+    .pager-right { text-align: left; }
+  }
+  .pager a { text-decoration: none; display: block; }
+  .pager .label { display: block; margin-bottom: 0.4rem; }
+  .pager-title {
+    font-family: var(--font-serif);
+    font-size: 1.08rem;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .pager a:hover .pager-title { color: var(--accent); }
+</style>

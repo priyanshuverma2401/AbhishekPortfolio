@@ -1,0 +1,91 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../site.config';
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+  path: string;
+  ogImage?: string;
+  type?: 'website' | 'article' | 'profile';
+  publishedAt?: string;
+  updatedAt?: string;
+  tags?: string[];
+  noindex?: boolean;
+  bareTitle?: boolean;
+  /** Page-specific structured data, merged into one @graph with the site-wide nodes. */
+  jsonLd?: Record<string, unknown>[];
+}
+
+const { jsonLd = [], ...head } = Astro.props;
+
+// Site-wide nodes every page carries, so Google can resolve the entity behind the domain.
+const graph = [
+  {
+    '@type': 'WebSite',
+    '@id': `${site.url}/#website`,
+    url: `${site.url}/`,
+    name: site.name,
+    description: site.description,
+    inLanguage: site.lang,
+    publisher: { '@id': `${site.url}/#person` },
+  },
+  {
+    '@type': 'Person',
+    '@id': `${site.url}/#person`,
+    name: site.name,
+    url: `${site.url}/`,
+    jobTitle: site.jobTitle,
+    email: site.email,
+    ...(site.company ? { worksFor: { '@type': 'Organization', name: site.company } } : {}),
+    ...(site.location ? { address: { '@type': 'PostalAddress', addressLocality: site.location } } : {}),
+    sameAs: [site.linkedin].filter(Boolean),
+  },
+  ...jsonLd,
+];
+---
+<!doctype html>
+<html lang={site.lang}>
+  <head>
+    <BaseHead {...head} />
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}
+    />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    <script is:inline>
+      // Scroll reveal, added by script only. With JS off or reduced motion on,
+      // the CSS never hides anything — the page just renders normally.
+      (function () {
+        if (!('IntersectionObserver' in window)) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        document.body.classList.add('js-reveal');
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-visible');
+              io.unobserve(entry.target);
+            });
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.05 }
+        );
+        document.querySelectorAll('[data-reveal]').forEach(function (el) {
+          io.observe(el);
+        });
+      })();
+    </script>
+  </body>
+</html>

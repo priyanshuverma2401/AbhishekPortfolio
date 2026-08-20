@@ -1,0 +1,241 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getArticles } from '../../lib/articles';
+import { formatDate } from '../../lib/format';
+import { site } from '../../site.config';
+
+const articles = await getArticles();
+
+// Group by year so the archive reads as a contents page rather than a feed.
+const byYear = articles.reduce<Record<string, typeof articles>>((acc, a) => {
+  const year = new Date(a.publishedAt).getFullYear().toString();
+  (acc[year] ??= []).push(a);
+  return acc;
+}, {});
+const years = Object.keys(byYear).sort((a, b) => Number(b) - Number(a));
+
+const description =
+  'Long-form writing on engineering leadership, organisational design and technical strategy — the parts of the job that resist frameworks.';
+
+const jsonLd = [
+  {
+    '@type': 'Blog',
+    '@id': `${site.url}/writeups#blog`,
+    url: `${site.url}/writeups`,
+    name: `${site.name} — Writing`,
+    description,
+    inLanguage: site.lang,
+    isPartOf: { '@id': `${site.url}/#website` },
+    author: { '@id': `${site.url}/#person` },
+    blogPost: articles.map((a) => ({
+      '@type': 'BlogPosting',
+      '@id': `${site.url}/writeups/${a.slug}#article`,
+      headline: a.title,
+      url: `${site.url}/writeups/${a.slug}`,
+      datePublished: a.publishedAt,
+      dateModified: a.updatedAt,
+    })),
+  },
+  {
+    '@type': 'BreadcrumbList',
+    '@id': `${site.url}/writeups#breadcrumbs`,
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${site.url}/` },
+      { '@type': 'ListItem', position: 2, name: 'Writing', item: `${site.url}/writeups` },
+    ],
+  },
+];
+---
+
+<BaseLayout title="Writing" description={description} path="/writeups" jsonLd={jsonLd}>
+  <section class="page-hero">
+    <div class="container">
+      <p class="label">Writing</p>
+      <h1>Writeups</h1>
+      <p class="lede">{description}</p>
+      <p class="hero-meta label">
+        {articles.length}
+        {articles.length === 1 ? ' piece' : ' pieces'}
+        <span aria-hidden="true"> · </span>
+        <a href="/rss.xml">RSS</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      {
+        articles.length === 0 ? (
+          <p class="empty">The first piece is being written. Check back shortly.</p>
+        ) : (
+          years.map((year) => (
+            <div class="year-block" data-reveal>
+              <div class="year-head">
+                <h2 class="year">{year}</h2>
+                <span class="year-rule" aria-hidden="true" />
+                <span class="label year-count">{byYear[year].length}</span>
+              </div>
+
+              <ol class="archive">
+                {byYear[year].map((a) => (
+                  <li>
+                    <a class="entry" href={`/writeups/${a.slug}`}>
+                      <div class="entry-meta">
+                        <time class="label" datetime={a.publishedAt}>
+                          {formatDate(a.publishedAt)}
+                        </time>
+                      </div>
+                      <div class="entry-body">
+                        <h3>{a.title}</h3>
+                        <p>{a.description}</p>
+                        <p class="label entry-foot">
+                          {a.tags.slice(0, 2).join(' · ')}
+                          {a.tags.length > 0 && <span aria-hidden="true"> — </span>}
+                          {a.readingMinutes} min read
+                        </p>
+                      </div>
+                      <span class="entry-arrow arrow" aria-hidden="true">&rarr;</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-block: clamp(3rem, 8vw, 5rem) clamp(2rem, 5vw, 3rem);
+    border-bottom: 1px solid var(--rule);
+  }
+  .page-hero h1 {
+    margin: 0.75rem 0 1.1rem;
+  }
+  .page-hero .lede {
+    max-width: 50ch;
+    margin-bottom: 1.5rem;
+  }
+  .hero-meta {
+    margin: 0;
+  }
+  .hero-meta a {
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .hero-meta a:hover {
+    color: var(--accent);
+  }
+
+  /* ---- Year grouping ---- */
+  .year-block + .year-block {
+    margin-top: 3.5rem;
+  }
+
+  .year-head {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  .year {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    margin: 0;
+  }
+  .year-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--rule-firm);
+  }
+  .year-count {
+    color: var(--muted);
+  }
+
+  /* ---- Entries ---- */
+  .archive {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .archive li + li {
+    border-top: 1px solid var(--rule);
+  }
+
+  .entry {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr) 2rem;
+    gap: 2rem;
+    align-items: start;
+    padding-block: 2rem;
+    text-decoration: none;
+    color: inherit;
+  }
+  @media (max-width: 52rem) {
+    .entry {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+      padding-block: 1.75rem;
+    }
+  }
+
+  .entry-meta time {
+    display: block;
+    padding-top: 0.45rem;
+  }
+  @media (max-width: 52rem) {
+    .entry-meta time {
+      padding-top: 0;
+    }
+  }
+
+  .entry-body h3 {
+    font-size: var(--step-2);
+    margin: 0 0 0.55rem;
+    color: var(--ink);
+    text-wrap: balance;
+    transition: color 140ms ease;
+  }
+  .entry:hover .entry-body h3 {
+    color: var(--accent);
+  }
+  .entry-body p {
+    margin: 0 0 0.8rem;
+    max-width: 56ch;
+    color: var(--muted);
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+  .entry-foot {
+    margin: 0 !important;
+    color: var(--muted);
+  }
+
+  .entry-arrow {
+    justify-self: end;
+    padding-top: 0.35rem;
+    color: var(--rule-firm);
+    transition: transform 140ms ease, color 140ms ease;
+  }
+  .entry:hover .entry-arrow {
+    color: var(--accent);
+    transform: translateX(3px);
+  }
+  @media (max-width: 52rem) {
+    .entry-arrow {
+      display: none;
+    }
+  }
+
+  .empty {
+    padding-block: 2rem;
+    color: var(--muted);
+  }
+</style>

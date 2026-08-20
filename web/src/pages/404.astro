@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Page not found" description="That page does not exist." path="/404" noindex>
+  <div class="container page">
+    <p class="label">Error 404</p>
+    <h1>That page does not exist</h1>
+    <p class="lede measure">
+      The address may have changed, or the piece may never have been published.
+      The <a href="/">writeups index</a> is the best place to start again.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: clamp(4rem, 12vw, 8rem); }
+  .page h1 { margin: 0.7rem 0 1rem; }
+</style>
