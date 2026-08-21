@@ -38,7 +38,7 @@ export const site = {
 
   // ---- Backend ------------------------------------------------------------
   /** TODO: your Render service URL. Used only by /admin, never by public pages. */
-  apiBase: 'https://your-api.onrender.com',
+  apiBase: 'https://abhishekportfolio-mtfz.onrender.com',
 } as const;
 
 /**
