@@ -233,6 +233,7 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
 
             const btn = document.createElement('button');
             btn.type = 'button';
+            btn.className = 'li-open';
 
             const t = document.createElement('span');
             t.className = 'li-title';
@@ -248,7 +249,20 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
             btn.appendChild(t);
             btn.appendChild(meta);
             btn.addEventListener('click', () => load(it._id));
+
+            // Delete without having to open the piece first. Sibling of the
+            // open button, never nested inside it — a button in a button is
+            // invalid markup and browsers drop the inner one.
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'li-del';
+            del.title = 'Delete "' + (it.title || 'Untitled') + '"';
+            del.setAttribute('aria-label', 'Delete ' + (it.title || 'Untitled'));
+            del.textContent = '×';
+            del.addEventListener('click', () => deleteArticle(it._id, it.title));
+
             li.appendChild(btn);
+            li.appendChild(del);
             els.list.appendChild(li);
           }
         } catch (err) {
@@ -363,17 +377,45 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
         }
       }
 
-      async function remove() {
-        if (!current._id) return say('Nothing saved to delete.', 'bad');
-        if (!confirm('Delete "' + current.title + '" permanently? This cannot be undone.')) return;
+      /**
+       * Delete one piece by id. Shared by the sidebar row buttons and the
+       * button at the foot of the editor, so both behave identically.
+       *
+       * Deleting a *published* piece has to trigger a rebuild. Without it the
+       * record leaves MongoDB but the static page carries on being served
+       * until the next build — which reads, correctly, as "delete did nothing".
+       */
+      async function deleteArticle(id, title) {
+        if (!id) return say('Nothing saved to delete.', 'bad');
+        if (!confirm('Delete "' + (title || 'Untitled') + '" permanently? This cannot be undone.')) return;
+
         say('Deleting...', 'busy');
         try {
-          await api('/api/articles/' + current._id, { method: 'DELETE' });
-          newDoc();
-          say('Deleted.', 'good');
+          const result = await api('/api/articles/' + id, { method: 'DELETE' });
+
+          // If the piece open in the editor is the one that just went, clear it.
+          if (current._id === id) newDoc();
+          else await loadList();
+
+          if (result && result.wasPublished) {
+            say('Deleted. Rebuilding the site...', 'busy');
+            try {
+              await api('/api/deploy', { method: 'POST' });
+              say('Deleted. The site rebuilds in about a minute.', 'good');
+            } catch (e) {
+              say('Deleted, but the rebuild hook did not fire — the page stays live until the next build.', 'bad');
+            }
+          } else {
+            say('Deleted.', 'good');
+          }
         } catch (err) {
           say('Delete failed: ' + err.message, 'bad');
+          console.error(err);
         }
+      }
+
+      function remove() {
+        return deleteArticle(current._id, current.title);
       }
 
       // ---- rich text ---------------------------------------------------------
@@ -647,19 +689,71 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
         margin: 0;
         padding: 0;
       }
-      .list-item + .list-item {
+
+      /* ------------------------------------------------------------------
+         Everything below is written as `.list :global(...)`.
+         The rows are built by document.createElement, so they never receive
+         Astro's data-astro-cid scope attribute and a plain scoped selector
+         would never match them. Going through the container keeps the styles
+         confined to this list while still reaching the generated children.
+         ------------------------------------------------------------------ */
+      .list :global(.list-item + .list-item) {
         border-top: 1px solid var(--rule);
       }
-      .list-item button {
+      /* Open button takes the row; the delete button sits at its right edge. */
+      .list :global(.list-item) {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .list :global(.li-open) {
+        flex: 1;
+        min-width: 0;
         display: block;
-        width: 100%;
         text-align: left;
         padding: 0.7rem 0;
         background: none;
         border: 0;
         cursor: pointer;
+        font: inherit;
+        color: inherit;
       }
-      .li-title {
+
+      .list :global(.li-del) {
+        flex: none;
+        width: 1.65rem;
+        height: 1.65rem;
+        padding: 0;
+        background: none;
+        border: 0;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        font-size: 1.05rem;
+        line-height: 1;
+        color: var(--muted);
+        border-radius: 2px;
+        opacity: 0;
+        transition: opacity 120ms ease, color 120ms ease, background 120ms ease;
+      }
+      /* Keyboard users never hover, so focus has to reveal it too. */
+      .list :global(.list-item:hover .li-del),
+      .list :global(.li-del:focus-visible) {
+        opacity: 1;
+      }
+      .list :global(.li-del:hover),
+      .list :global(.li-del:focus-visible) {
+        color: #a03028;
+        background: color-mix(in srgb, #a03028 12%, transparent);
+      }
+      /* Touch devices have no hover, so it has to stay visible. */
+      @media (hover: none) {
+        .list :global(.li-del) {
+          opacity: 1;
+        }
+      }
+
+      .list :global(.li-title) {
         display: block;
         font-family: var(--font-serif);
         font-size: 0.95rem;
@@ -667,31 +761,31 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
         line-height: 1.4;
         margin-bottom: 0.3rem;
       }
-      .list-item button:hover .li-title {
+      .list :global(.li-open:hover .li-title) {
         color: var(--accent);
       }
-      .is-current .li-title {
+      .list :global(.is-current .li-title) {
         color: var(--accent);
         font-weight: 600;
       }
-      .li-meta {
+      .list :global(.li-meta) {
         display: flex;
         align-items: center;
         gap: 0.4rem;
       }
-      .dot {
+      .list :global(.dot) {
         width: 5px;
         height: 5px;
         border-radius: 50%;
         background: var(--rule-firm);
       }
-      .dot.published {
+      .list :global(.dot.published) {
         background: #3f8a63;
       }
-      .dot.draft {
+      .list :global(.dot.draft) {
         background: #c9a227;
       }
-      .list-empty {
+      .list :global(.list-empty) {
         font-size: 0.85rem;
         color: var(--muted);
         padding: 0.5rem 0;

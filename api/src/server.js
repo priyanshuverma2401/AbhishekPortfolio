@@ -247,8 +247,22 @@ app.put('/api/articles/:id', requireAuth, async (req, res, next) => {
 app.delete('/api/articles/:id', requireAuth, async (req, res, next) => {
   try {
     if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ error: 'Bad id' });
-    await articles.deleteOne({ _id: new ObjectId(req.params.id) });
-    res.status(204).end();
+
+    // findOneAndDelete rather than deleteOne: the caller needs to know whether
+    // anything actually went, and whether it was live. A published piece that
+    // disappears from Mongo is still on the static site until a rebuild runs.
+    const result = await articles.findOneAndDelete({ _id: new ObjectId(req.params.id) });
+    const deleted = result?.value ?? result; // driver 6 returns the doc directly
+    if (!deleted) {
+      return res.status(404).json({ error: 'Not found — it may already have been deleted' });
+    }
+
+    res.json({
+      ok: true,
+      slug: deleted.slug,
+      title: deleted.title,
+      wasPublished: deleted.status === 'published',
+    });
   } catch (err) {
     next(err);
   }
