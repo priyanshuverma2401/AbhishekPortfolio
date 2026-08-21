@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site, closing } from '../site.config';
 
-const description = `${site.name} is ${site.jobTitle}. Two decades building engineering systems, the teams behind them, and the operating models that hold both together.`;
+const description = `${site.name} — enterprise AI transformation leader. 15+ years building AI from zero to scale, across classical machine learning, GenAI, RAG and agentic platforms in regulated enterprise environments.`;
 
 const jsonLd = [
   {
@@ -25,31 +25,113 @@ const jsonLd = [
   },
 ];
 
-// ---------------------------------------------------------------------------
-// EDIT EVERYTHING BELOW. This is scaffolding in your voice — the [bracketed]
-// parts are placeholders. I have deliberately not invented your career.
-// ---------------------------------------------------------------------------
-
 const principles = [
   {
-    title: 'Structure before effort',
-    body: 'When a team slows down, the cause is almost never how hard people are working. It is usually where a boundary was drawn, or who is allowed to decide.',
+    title: 'The model is a commodity',
+    body: 'Same model, radically different outcomes. What separates them is system design, data quality, retrieval architecture and the shape of the context you hand it — not the frontier release on the label.',
   },
   {
-    title: 'Decisions over frameworks',
-    body: 'Frameworks travel badly between organisations. Judgement travels — knowing which problems are structural, which are temporary, and which need someone to be told the truth.',
+    title: 'Governance from day one',
+    body: 'Data boundaries, DLP, PII handling and responsible-AI review are cheap to design in and expensive to retrofit. In regulated environments they are also the difference between a pilot and something that ships.',
   },
   {
-    title: 'Context is an asset',
-    body: 'An engineer who has lived with a system for two years holds a map that exists nowhere else. Most reorganisations write that asset off without ever recording it.',
+    title: 'Adoption is the product',
+    body: 'A platform nobody opens has delivered nothing. Most resistance is rational — people burned by earlier tools, missing access, misaligned incentives — and each of those needs a different intervention.',
   },
 ];
 
 const career = [
-  { period: '[2021 — present]', role: '[Vice President, Engineering]', org: '[Company]', note: '[What you own, and what changed because you were there.]' },
-  { period: '[2016 — 2021]', role: '[Senior Director, Engineering]', org: '[Company]', note: '[One line.]' },
-  { period: '[2011 — 2016]', role: '[Engineering Manager]', org: '[Company]', note: '[One line.]' },
-  { period: '[2004 — 2011]', role: '[Software Engineer]', org: '[Company]', note: '[One line.]' },
+  {
+    period: 'Sept 2025 — present',
+    role: 'Senior Consultant (AVP), Enterprise AI & Sales Transformation',
+    org: 'WNS Global Services (now Capgemini) · Gurugram',
+    note: 'AI strategy and portfolio for the commercial function of a $3.3B organisation — architecture, governance and investment decisions, reporting to global commercial leadership. Built the GTM intelligence layer: a proprietary account-signal platform and a production account-planning agent, now serving 300+ users across a $570M+ deal portfolio.',
+  },
+  {
+    period: 'Nov 2019 — Sept 2025',
+    role: 'Director, AI/ML Solutions, GenAI Products & Enterprise Intelligence',
+    org: 'LTIMindtree · Bengaluru',
+    note: 'Built and led a 20-person AI/ML practice from zero inside the CIO organisation, owning a ~$500K annual cost base. Shipped the organisation’s first production GenAI solutions in 2023, and a 100,000-user AI talent marketplace that replaced a ~$200K black-box vendor licence with an explainable in-house platform.',
+  },
+  {
+    period: 'Mar 2019 — Oct 2019',
+    role: 'Advisor, Data Science & Analytics',
+    org: 'Dell Technologies · Bengaluru',
+    note: 'Predictive analytics across TB+ consumer datasets, end to end from data sourcing through production integration — a 20% operational efficiency improvement.',
+  },
+  {
+    period: 'Feb 2018 — Feb 2019',
+    role: 'Lead Data Scientist',
+    org: 'Tata Consultancy Services · Bengaluru',
+    note: 'Led a three-person team on NLP text classification and entity extraction for enterprise clients across the US, UK and Asia — 30% improvement in reporting accuracy.',
+  },
+  {
+    period: 'Apr 2015 — Jan 2018',
+    role: 'Machine Learning Engineer',
+    org: 'Ericsson · Gurugram',
+    note: 'Regression, classification and churn models for telecom network performance analytics, and the Python pipelines behind them, for clients in the USA and South Africa.',
+  },
+  {
+    period: '2011 — 2015',
+    role: 'Data Scientist / ML Engineer',
+    org: 'Saburi TLC · Axon Network Solutions · ASMA Financial Solutions',
+    note: 'Churn prediction, customer segmentation, demand forecasting and revenue analytics across telecom, networking and financial services — where the Python, SQL and statistical foundations were laid.',
+  },
+];
+
+const work = [
+  {
+    name: 'GTM Intelligence Layer — Signal Platform',
+    org: 'WNS / Capgemini',
+    note: 'Account intelligence built on open data: 10-K and 8-K filings, earnings calls, Yahoo Finance and Google News, executive movement, hiring and funding signals — combined into a composite buyer-intent score for pipeline prioritisation across BFSI, Healthcare and other verticals. Replaced a $4,000/year commercial subscription.',
+  },
+  {
+    name: 'GTM Intelligence Layer — Account Planning Agent',
+    org: 'WNS / Capgemini',
+    note: 'Production agentic platform turning CRM records, account signals, internal proof points and an enterprise knowledge base into a pursuit-ready plan in under ten minutes rather than two to three hours. It closes the loop: signal, priority, plan, pursuit.',
+  },
+  {
+    name: 'Proposal & Pursuit Strategy Copilot',
+    org: 'WNS / Capgemini',
+    note: 'LLM-powered pursuit system for $20M–$100M RFP cycles — pre-RFP strategy, win themes, executive briefings, SME mobilisation, orals prep and post-meeting iteration. Source-grounded and human-gated throughout.',
+  },
+  {
+    name: 'AI Talent Marketplace (SmartMatch)',
+    org: 'LTIMindtree',
+    note: 'Two-way agentic matching across 100,000 users at 90% accuracy, with 90,000 structured skill profiles created behind it. Replaced a ~$200K annual vendor licence and, unlike it, could explain every match it made.',
+  },
+  {
+    name: 'Enterprise GenAI Suite',
+    org: 'LTIMindtree',
+    note: 'The organisation’s first production GenAI, in 2023: a Sales Proposal Bot (~40% less RFP preparation effort), an HR Policy Q&A Bot (~35% lower helpdesk load) and a Cybersecurity Risk & Control Bot. Standards co-developed with Microsoft product teams.',
+  },
+  {
+    name: 'People Analytics & ML Platforms',
+    org: 'LTIMindtree',
+    note: 'Joining propensity, a three-layer explainable attrition predictor built to be usable by HR business partners, employee-project matching on Azure ML with NLP embeddings at 90% accuracy, and salary forecasting.',
+  },
+];
+
+const education = [
+  {
+    award: 'Executive MBA',
+    place: 'Indian Institute of Management (IIM) Indore',
+    period: '2025 — 2027 (in progress)',
+  },
+  {
+    award: 'B.Tech, Computer Science',
+    place: 'Dr. MGR Educational and Research Institute, Chennai',
+    period: '2011',
+  },
+];
+
+const stack = [
+  'Python', 'SQL', 'Azure ML', 'Azure OpenAI', 'Azure AI Search', 'Azure APIM',
+  'Azure Monitor', 'Azure DevOps', 'Copilot Studio', 'Power Platform', 'LangChain',
+  'LangGraph', 'RAG pipelines', 'Vector databases', 'Prompt engineering', 'LLMs',
+  'LLMOps', 'Machine learning', 'Deep learning', 'NLP', 'scikit-learn', 'PySpark',
+  'Databricks', 'Snowflake', 'AWS', 'GCP', 'Power BI', 'FastAPI', 'Docker',
+  'MLOps', 'Streamlit',
 ];
 ---
 
@@ -70,21 +152,28 @@ const career = [
     <div class="container intro-grid">
       <div class="prose" data-reveal>
         <p>
-          I have spent the better part of two decades in engineering — first
-          building systems, then building the teams that build them. Today I
-          lead engineering at [company], where I am responsible for [scope:
-          platform, headcount, business lines].
+          I have spent fifteen years building AI inside enterprises — first the
+          models, then the platforms around them, and now the organisations that
+          have to live with both. The work has tracked the field: regression and
+          churn models on telecom telemetry, NLP and entity extraction for
+          enterprise clients, then large-scale people analytics, then GenAI, and
+          now agentic systems in production.
         </p>
         <p>
-          Most of my time goes to three things: setting technical direction that
-          survives contact with a roadmap, designing organisations that can
-          absorb change without stalling, and developing the people who will do
-          this job after me.
+          Today I lead AI transformation for the commercial function of a $3.3B
+          organisation — owning architecture, governance, investment decisions
+          and the adoption roadmap, reporting to global commercial leadership.
+          The current work is a GTM intelligence layer: an account-signal
+          platform that says who to pursue and when, and an agentic planning
+          platform that says how. Before this I built a 20-person AI practice
+          from zero at LTIMindtree and ran a ~$500K annual cost base against it.
         </p>
         <p>
-          I write here to think that through in public. The pieces are longer
-          than a post and shorter than a book, and they are aimed at people
-          doing this job rather than people describing it.
+          What I keep finding is that the interesting problems are not modelling
+          problems. They are data-boundary problems, retrieval problems,
+          governance problems, and — most often — adoption problems. I write
+          here about that half of the job, because it is the half that decides
+          whether anything reaches production.
         </p>
       </div>
 
@@ -93,19 +182,19 @@ const career = [
         <dl class="side-list">
           <div>
             <dt class="label">Role</dt>
-            <dd>[Vice President, Engineering]</dd>
+            <dd>Senior Consultant (AVP), Enterprise AI &amp; Sales Transformation</dd>
           </div>
           <div>
             <dt class="label">Focus</dt>
-            <dd>[Platform modernisation at scale]</dd>
+            <dd>Commercial AI and GTM intelligence at enterprise scale</dd>
           </div>
           <div>
-            <dt class="label">Team</dt>
-            <dd>[~120 engineers across 3 sites]</dd>
+            <dt class="label">Portfolio</dt>
+            <dd>6–7 concurrent AI initiatives; $570M+ in active deals</dd>
           </div>
           <div>
             <dt class="label">Based in</dt>
-            <dd>{site.location || '[City, Country]'}</dd>
+            <dd>{site.location} — open to relocation, EU / global</dd>
           </div>
         </dl>
       </aside>
@@ -119,7 +208,10 @@ const career = [
         <p class="label">How I think</p>
         <div>
           <h2>Three things I keep coming back to</h2>
-          <p>Not a philosophy. Just the patterns that have held up across enough organisations to trust.</p>
+          <p>
+            Not a philosophy. Just the patterns that have held up across enough
+            organisations, and enough generations of the technology, to trust.
+          </p>
         </div>
       </div>
 
@@ -137,8 +229,39 @@ const career = [
     </div>
   </section>
 
-  <!-- ================= Career ================= -->
+  <!-- ================= Selected work ================= -->
   <section class="section">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <p class="label">Selected work</p>
+        <div>
+          <h2>Platforms I have shipped</h2>
+          <p>
+            Systems that reached production and stayed there, rather than
+            proofs of concept. Client detail withheld where it should be.
+          </p>
+        </div>
+      </div>
+
+      <ol class="work" data-reveal>
+        {
+          work.map((item, i) => (
+            <li class="work-item">
+              <span class="index-num">{String(i + 1).padStart(2, '0')}</span>
+              <div class="work-body">
+                <h3>{item.name}</h3>
+                <p class="label work-org">{item.org}</p>
+                <p>{item.note}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= Career ================= -->
+  <section class="section section--band">
     <div class="container">
       <div class="section-header" data-reveal>
         <p class="label">Background</p>
@@ -154,9 +277,8 @@ const career = [
             <li class="timeline-item">
               <div class="timeline-period label">{role.period}</div>
               <div class="timeline-body">
-                <h3>
-                  {role.role} <span class="timeline-org">{role.org}</span>
-                </h3>
+                <h3>{role.role}</h3>
+                <p class="timeline-org">{role.org}</p>
                 <p>{role.note}</p>
               </div>
             </li>
@@ -169,6 +291,43 @@ const career = [
           Full history on LinkedIn <span class="arrow" aria-hidden="true">&rarr;</span>
         </a>
       </p>
+    </div>
+  </section>
+
+  <!-- ================= Education & stack ================= -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <p class="label">Credentials</p>
+        <div>
+          <h2>Education and the stack I build on</h2>
+          <p>
+            Tools change every eighteen months. These are the ones currently in
+            hand.
+          </p>
+        </div>
+      </div>
+
+      <dl class="education" data-reveal>
+        {
+          education.map((e) => (
+            <div class="education-item">
+              <dt>
+                {e.award}
+                <span class="education-place">{e.place}</span>
+              </dt>
+              <dd class="label">{e.period}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <div class="stack-block" data-reveal>
+        <p class="label stack-title">Technical stack</p>
+        <ul class="stack">
+          {stack.map((tool) => <li>{tool}</li>)}
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -245,6 +404,47 @@ const career = [
     line-height: 1.45;
   }
 
+  /* ---- Selected work ---- */
+  .work {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--rule-firm);
+  }
+  .work-item {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    gap: 0 1rem;
+    padding-block: 1.75rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (max-width: 40rem) {
+    .work-item {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+  .work-item .index-num {
+    padding-top: 0.4rem;
+    margin-bottom: 0;
+  }
+  .work-body h3 {
+    font-size: 1.12rem;
+    margin: 0 0 0.3rem;
+    line-height: 1.4;
+  }
+  .work-org {
+    margin: 0 0 0.7rem;
+  }
+  .work-body > p:last-child {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.98rem;
+    line-height: 1.68;
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+
   /* ---- Timeline ---- */
   .timeline {
     list-style: none;
@@ -254,9 +454,9 @@ const career = [
   }
   .timeline-item {
     display: grid;
-    grid-template-columns: 10rem minmax(0, 1fr);
+    grid-template-columns: 11rem minmax(0, 1fr);
     gap: 2rem;
-    padding-block: 1.6rem;
+    padding-block: 1.75rem;
     border-bottom: 1px solid var(--rule);
   }
   @media (max-width: 52rem) {
@@ -276,22 +476,84 @@ const career = [
   }
   .timeline-body h3 {
     font-size: 1.12rem;
-    margin: 0 0 0.35rem;
+    margin: 0 0 0.3rem;
     line-height: 1.4;
   }
   .timeline-org {
+    margin: 0 0 0.7rem;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
     color: var(--muted);
-    font-weight: 400;
   }
-  .timeline-body p {
+  .timeline-body > p:last-child {
     margin: 0;
     color: var(--muted);
     font-size: 0.98rem;
-    line-height: 1.65;
-    max-width: 56ch;
+    line-height: 1.68;
+    max-width: 62ch;
+    text-wrap: pretty;
   }
 
   .linkedin-line {
     margin: 2.25rem 0 0;
+  }
+
+  /* ---- Education ---- */
+  .education {
+    margin: 0;
+    border-top: 1px solid var(--rule-firm);
+  }
+  .education-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem 2rem;
+    flex-wrap: wrap;
+    padding-block: 1.2rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .education-item dt {
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .education-place {
+    display: block;
+    font-weight: 400;
+    font-size: 0.98rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+  .education-item dd {
+    margin: 0;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ---- Stack ---- */
+  .stack-block {
+    margin-top: clamp(2rem, 4vw, 2.75rem);
+  }
+  .stack-title {
+    margin: 0 0 1rem;
+  }
+  .stack {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .stack li {
+    font-family: var(--font-sans);
+    font-size: 0.83rem;
+    line-height: 1;
+    color: var(--ink-soft);
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--rule);
+    background: var(--paper);
   }
 </style>

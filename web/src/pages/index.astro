@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getArticles } from '../lib/articles';
 import { formatDate } from '../lib/format';
-import { site, hero, focusAreas, closing } from '../site.config';
+import { site, hero, focusAreas, metrics, closing } from '../site.config';
 
 const articles = await getArticles();
 const featured = articles.slice(0, 4);
@@ -46,7 +46,7 @@ const jsonLd = [
           <a href="/writeups" class="button">
             Read the writing <span class="arrow" aria-hidden="true">&rarr;</span>
           </a>
-          <a href="/about" class="button button--ghost">About me</a>
+          <a href="/about" class="button button--ghost">Background &amp; work</a>
         </div>
       </div>
     </div>
@@ -65,16 +65,34 @@ const jsonLd = [
     </div>
   </section>
 
+  <!-- ================= Evidence ================= -->
+  <section class="section section--tight">
+    <div class="container">
+      <p class="label metrics-title">By the numbers</p>
+      <dl class="metrics" data-reveal>
+        {
+          metrics.map((m) => (
+            <div class="metric">
+              <dt class="metric-value">{m.value}</dt>
+              <dd class="metric-label">{m.label}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
   <!-- ================= Focus areas ================= -->
   <section class="section section--band">
     <div class="container">
       <div class="section-header" data-reveal>
         <p class="label">What I work on</p>
         <div>
-          <h2>Three problems, in roughly this order</h2>
+          <h2>Three things, in roughly this order</h2>
           <p>
-            Most of what I do reduces to these. They are listed in the order I
-            usually find them, not the order people expect.
+            Architecture, commercial outcome, and adoption. The first is the
+            part people plan for; the last is the part that decides whether the
+            first ever mattered.
           </p>
         </div>
       </div>
@@ -101,8 +119,9 @@ const jsonLd = [
         <div>
           <h2>Recent pieces</h2>
           <p>
-            Longer than a post, shorter than a book, and aimed at people doing
-            this job rather than people describing it.
+            Longer than a post, shorter than a book, and aimed at people
+            shipping AI inside real organisations rather than people describing
+            it from outside.
           </p>
         </div>
       </div>
@@ -275,6 +294,89 @@ const jsonLd = [
     font-family: var(--font-serif);
     font-size: 1.05rem;
     color: var(--ink);
+  }
+
+  /* ---- Metrics ---- */
+  .metrics-title {
+    margin: 0 0 1.1rem;
+  }
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    margin: 0;
+    border-top: 1px solid var(--rule-firm);
+  }
+  @media (max-width: 52rem) {
+    .metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 30rem) {
+    .metrics {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .metric {
+    padding: 1.5rem 1.5rem 1.6rem 0;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* 3 x 2: no rule after the third column, none under the last row. */
+  @media (min-width: 52rem) {
+    .metric:not(:nth-child(3n + 1)) {
+      padding-left: 1.5rem;
+    }
+    .metric:nth-child(3n) {
+      border-right: 0;
+      padding-right: 0;
+    }
+    .metric:nth-child(n + 4) {
+      border-bottom: 0;
+    }
+  }
+
+  /* 2 x 3 */
+  @media (min-width: 30rem) and (max-width: 52rem) {
+    .metric:nth-child(even) {
+      border-right: 0;
+      padding-right: 0;
+      padding-left: 1.5rem;
+    }
+    .metric:nth-last-child(-n + 2) {
+      border-bottom: 0;
+    }
+  }
+
+  /* Single column */
+  @media (max-width: 30rem) {
+    .metric {
+      border-right: 0;
+      padding: 1.1rem 0;
+    }
+    .metric:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .metric-value {
+    font-family: var(--font-serif);
+    font-size: clamp(1.6rem, 1.3rem + 1.3vw, 2.2rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    color: var(--ink);
+  }
+  .metric-label {
+    margin: 0.5rem 0 0;
+    max-width: 26ch;
+    font-family: var(--font-sans);
+    font-size: 0.83rem;
+    line-height: 1.55;
+    color: var(--muted);
+    text-wrap: pretty;
   }
 
   /* ---- Writing ---- */
