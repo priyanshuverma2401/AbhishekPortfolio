@@ -49,6 +49,12 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
             <span class="label">Tags <span class="hint-inline">comma separated</span></span>
             <input id="f-tags" type="text" autocomplete="off" placeholder="Engineering Leadership, Strategy" />
           </label>
+
+          <label class="field">
+            <span class="label">Publish date</span>
+            <input id="f-date" type="date" min="1990-01-01" />
+            <span class="hint" id="date-hint"></span>
+          </label>
         </div>
 
         <label class="field">
@@ -132,6 +138,8 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
         slug: $('f-slug'),
         desc: $('f-desc'),
         tags: $('f-tags'),
+        date: $('f-date'),
+        dateHint: $('date-hint'),
         body: $('body'),
         list: $('list'),
         status: $('status'),
@@ -151,6 +159,12 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
       let slugTouched = false;
       let pendingImageTarget = 'body'; // 'body' | 'cover'
 
+      // What the date input held when the piece was loaded. Comparing against it
+      // tells us whether the date was actually moved, so an untouched date can be
+      // echoed back to the API byte-for-byte rather than rebuilt from a
+      // day-precision field and losing its time of day on every save.
+      let loadedDate = '';
+
       function blank() {
         return {
           _id: null,
@@ -161,6 +175,7 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
           html: '',
           coverImage: null,
           status: 'draft',
+          publishedAt: null,
         };
       }
 
@@ -183,6 +198,66 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '')
           .slice(0, 80);
+      }
+
+      /**
+       * ISO instant -> the YYYY-MM-DD an <input type="date"> wants, in *local*
+       * time. Slicing the ISO string instead would show the UTC day, which is
+       * the wrong one for roughly half of every day.
+       */
+      function toDateInput(iso) {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (isNaN(d)) return '';
+        const pad = (n) => String(n).padStart(2, '0');
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      }
+
+      /**
+       * YYYY-MM-DD -> an ISO instant at 09:00 local time on that day.
+       *
+       * The time of day is carried over from the piece's existing date where
+       * there is one, so nudging the day does not also reset the hour. 09:00 is
+       * the default because it lands on the same calendar day in every timezone
+       * once converted to UTC — the site formats dates from UTC at build time,
+       * and a midnight stamp would show up a day early or late.
+       */
+      function fromDateInput(value) {
+        if (!value) return null;
+        const parts = value.split('-').map(Number);
+        if (parts.length !== 3 || parts.some(isNaN)) return null;
+        const prev = current.publishedAt ? new Date(current.publishedAt) : null;
+        const usable = prev && !isNaN(prev);
+        const h = usable ? prev.getHours() : 9;
+        const m = usable ? prev.getMinutes() : 0;
+        return new Date(parts[0], parts[1] - 1, parts[2], h, m, 0, 0).toISOString();
+      }
+
+      function humanDate(iso) {
+        if (!iso) return '';
+        const d = new Date(iso);
+        return isNaN(d)
+          ? ''
+          : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+
+      /** Mirror a piece's stored date into the input, and remember what we set. */
+      function setDate(iso) {
+        els.date.value = toDateInput(iso);
+        loadedDate = els.date.value;
+        refreshDateHint();
+      }
+
+      function refreshDateHint() {
+        if (!els.date.value) {
+          els.dateHint.textContent = 'Empty — files under today when you publish.';
+          return;
+        }
+        const moved = els.date.value !== loadedDate;
+        const shown = humanDate(fromDateInput(els.date.value));
+        els.dateHint.textContent = moved
+          ? 'Will be filed under ' + shown + ', with no "last updated" line.'
+          : 'Filed under ' + shown + '.';
       }
 
       function escapeHtml(s) {
@@ -213,6 +288,8 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
         els.serpUrl.textContent = SITE_ORIGIN.replace(/^https?:\/\//, '') + ' › writeups › ' + (slug || '...');
         els.serpTitle.textContent = els.title.value || 'Title';
         els.serpDesc.textContent = d || 'Meta description';
+
+        refreshDateHint();
       }
 
       // ---- list ------------------------------------------------------------
@@ -245,6 +322,14 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
             dot.className = 'dot ' + it.status;
             meta.appendChild(dot);
             meta.appendChild(document.createTextNode(it.status));
+            // Once the archive spans years, the date is what you scan it by.
+            const when = toDateInput(it.publishedAt);
+            if (when) {
+              const time = document.createElement('span');
+              time.className = 'li-date';
+              time.textContent = when;
+              meta.appendChild(time);
+            }
 
             btn.appendChild(t);
             btn.appendChild(meta);
@@ -288,6 +373,7 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
           els.tags.value = (doc.tags || []).join(', ');
           els.body.innerHTML = doc.html || '';
           setCover(doc.coverImage || null);
+          setDate(doc.publishedAt);
           refreshDerived();
           say('');
           loadList();
@@ -307,6 +393,7 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
         els.tags.value = '';
         els.body.innerHTML = '';
         setCover(null);
+        setDate(null);
         refreshDerived();
         loadList();
         els.title.focus();
@@ -338,6 +425,13 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
           html: els.body.innerHTML.trim(),
           coverImage: current.coverImage,
           status: status,
+          // An untouched date goes back exactly as it arrived. Only a date the
+          // editor actually moved is rebuilt from the field, and that is what
+          // tells the API this is a deliberate backdate, not a routine save.
+          publishedAt:
+            els.date.value === loadedDate && current.publishedAt
+              ? current.publishedAt
+              : fromDateInput(els.date.value),
         };
       }
 
@@ -357,6 +451,8 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
 
           current = saved;
           els.slug.value = saved.slug;
+          // The API fills a blank date in with the moment of publishing.
+          setDate(saved.publishedAt);
           refreshDerived();
           await loadList();
 
@@ -536,6 +632,7 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
         slugTouched = true;
         refreshDerived();
       });
+      els.date.addEventListener('input', refreshDateHint);
       els.desc.addEventListener('input', refreshDerived);
       els.body.addEventListener('input', refreshDerived);
 
@@ -773,6 +870,12 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
         align-items: center;
         gap: 0.4rem;
       }
+      /* Pushed to the right edge so a column of dates stays scannable. */
+      .list :global(.li-date) {
+        margin-left: auto;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.02em;
+      }
       .list :global(.dot) {
         width: 5px;
         height: 5px;
@@ -840,6 +943,7 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
       }
 
       .field input[type='text'],
+      .field input[type='date'],
       .field textarea {
         width: 100%;
         font-family: var(--font-sans);
@@ -864,6 +968,11 @@ const apiBase = import.meta.env.DEV ? 'http://localhost:8080' : site.apiBase;
         font-size: 0.75rem;
         color: var(--muted);
         word-break: break-all;
+      }
+      /* .hint breaks anywhere so long slug URLs wrap; prose hints should not. */
+      #date-hint {
+        word-break: normal;
+        overflow-wrap: break-word;
       }
       .hint-inline {
         font-size: 0.7rem;

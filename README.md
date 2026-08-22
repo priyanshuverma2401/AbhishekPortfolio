@@ -190,6 +190,16 @@ Go to `https://your-domain/admin`.
   is the range Google renders without truncating.
 - The **Google result preview** at the bottom shows roughly how the page will
   appear in search results before you commit.
+- The **publish date** is yours to set. Leave it empty and the piece is filed
+  under the moment you publish; pick a date and it is filed under that instead,
+  which is how you seed an archive of older work rather than having everything
+  dated the day you typed it in. `/writeups` groups by year, so a backdated
+  piece lands in its own year automatically.
+- Moving the date also resets *last updated*, so a backdated piece reads as
+  written then and untouched since — no "Last updated" line giving it away.
+  Editing it afterwards without touching the date stamps the real edit date,
+  which is the honest and correct behaviour. Clearing the field never wipes a
+  date already stored.
 - **Save draft** stores it without publishing; drafts are never built into the
   site. **Publish** makes it live and triggers the rebuild.
 

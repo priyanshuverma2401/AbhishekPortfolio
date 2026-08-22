@@ -138,6 +138,23 @@ function clampText(value, max) {
   return String(value ?? '').trim().slice(0, max);
 }
 
+/**
+ * The publish date is editable from the admin so older work can be filed under
+ * the date it was actually written rather than the date it was typed in.
+ *
+ * Anything unparseable is ignored rather than rejected — a bad date should not
+ * cost you the draft — and the range guard stops a slipped keystroke ("0215")
+ * filing a piece two thousand years out.
+ */
+function parsePublishedAt(value) {
+  if (value === undefined || value === null || value === '') return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  const year = d.getUTCFullYear();
+  if (year < 1990 || year > 2100) return null;
+  return d;
+}
+
 /** Build the stored document from whatever the editor posted. */
 function buildDoc(body, existing) {
   const html = sanitizeHtml(String(body.html ?? ''), SANITIZE_OPTIONS);
@@ -156,6 +173,20 @@ function buildDoc(body, existing) {
       : null;
 
   const wasPublished = existing?.status === 'published';
+  const existingPublishedAt = existing?.publishedAt ? new Date(existing.publishedAt) : null;
+  const supplied = parsePublishedAt(body.publishedAt);
+
+  // The date is set once on first publish and then only ever moved by an
+  // explicit date from the editor. It never drifts on its own — a publish date
+  // that wanders is read as churn by search engines.
+  const publishedAt =
+    supplied ?? existingPublishedAt ?? (status === 'published' ? now : null);
+
+  // Did the editor actually move the date, as opposed to echoing back what was
+  // already stored? Only a deliberate move changes how updatedAt is stamped.
+  const dateMoved =
+    !!supplied &&
+    (!existingPublishedAt || supplied.getTime() !== existingPublishedAt.getTime());
 
   return {
     title: clampText(body.title, 200),
@@ -166,11 +197,15 @@ function buildDoc(body, existing) {
     coverImage,
     status,
     readingMinutes: readingMinutes(html),
-    // publishedAt is set once, the first time it goes live, and never moves —
-    // a changing publish date is read as churn by search engines.
-    publishedAt:
-      existing?.publishedAt ?? (status === 'published' ? now : null),
-    updatedAt: wasPublished || status === 'published' ? now : (existing?.updatedAt ?? now),
+    publishedAt,
+    // A piece filed under an earlier date reads as written then and untouched
+    // since, so moving the date carries updatedAt with it and the article page
+    // shows no "last updated" line. Ordinary edits still stamp the real time.
+    updatedAt: dateMoved
+      ? publishedAt
+      : wasPublished || status === 'published'
+        ? now
+        : (existing?.updatedAt ?? now),
     createdAt: existing?.createdAt ?? now,
   };
 }
