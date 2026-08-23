@@ -114,14 +114,11 @@ const work = [
 
 const education = [
   {
-    award: 'Executive MBA',
+    award: 'MBA',
     place: 'Indian Institute of Management (IIM) Indore',
-    period: '2025 — 2027 (in progress)',
   },
   {
     award: 'B.Tech, Computer Science',
-    place: 'Dr. MGR Educational and Research Institute, Chennai',
-    period: '2011',
   },
 ];
 
@@ -308,19 +305,16 @@ const stack = [
         </div>
       </div>
 
-      <dl class="education" data-reveal>
+      <ul class="education" data-reveal>
         {
           education.map((e) => (
-            <div class="education-item">
-              <dt>
-                {e.award}
-                <span class="education-place">{e.place}</span>
-              </dt>
-              <dd class="label">{e.period}</dd>
-            </div>
+            <li class="education-item">
+              <span class="education-award">{e.award}</span>
+              {e.place && <span class="education-place">{e.place}</span>}
+            </li>
           ))
         }
-      </dl>
+      </ul>
 
       <div class="stack-block" data-reveal>
         <p class="label stack-title">Technical stack</p>
@@ -501,19 +495,17 @@ const stack = [
 
   /* ---- Education ---- */
   .education {
+    list-style: none;
     margin: 0;
+    padding: 0;
     border-top: 1px solid var(--rule-firm);
   }
   .education-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 1rem 2rem;
-    flex-wrap: wrap;
     padding-block: 1.2rem;
     border-bottom: 1px solid var(--rule);
   }
-  .education-item dt {
+  .education-award {
+    display: block;
     font-family: var(--font-serif);
     font-size: 1.05rem;
     font-weight: 600;
@@ -525,11 +517,6 @@ const stack = [
     font-size: 0.98rem;
     color: var(--muted);
     margin-top: 0.2rem;
-  }
-  .education-item dd {
-    margin: 0;
-    color: var(--muted);
-    white-space: nowrap;
   }
 
   /* ---- Stack ---- */
