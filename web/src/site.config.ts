@@ -103,17 +103,65 @@ export const focusAreas = [
   },
 ] as const;
 
+/** Logos row above the evidence groups. Order is chronological. */
+export const builtAt = ['Ericsson', 'TCS', 'Dell', 'LTIM', 'Capgemini'] as const;
+
 /**
- * Headline evidence. Six reads well as a 3x2 grid; keep the figures to
- * things you would be comfortable being asked about in an interview.
+ * Headline evidence, grouped by where the work landed. Each group is a
+ * three-column row — keep every group at exactly three entries so the
+ * grid stays even. Figures should be things you would be comfortable
+ * being asked to defend in an interview.
  */
-export const metrics = [
-  { value: '$570M+', label: 'Active deal portfolio running on agentic AI' },
-  { value: '94%', label: 'Cut in account-planning cycle time' },
-  { value: '300+', label: 'Daily users on the planning agent' },
-  { value: '15+ yrs', label: 'Building AI, from classical ML to agents' },
-  { value: '0 → 20', label: 'AI practice built from nothing' },
-  { value: '~$500K', label: 'Annual AI cost base owned' },
+export const evidence = [
+  {
+    group: 'Foundation',
+    items: [
+      { value: '50+', label: 'AI/ML solutions across classical ML, deep learning and NLP' },
+      { value: '20+', label: 'Enterprise-grade GenAI and agentic systems in production' },
+      { value: '0 → 20', label: 'AI practice built from nothing' },
+    ],
+  },
+  {
+    group: 'HR and talent',
+    items: [
+      { value: '100K', label: 'Users on an agentic talent marketplace' },
+      { value: '90%', label: 'Match accuracy, explainable and auditable' },
+      { value: '35%', label: 'HR helpdesk load reduced through self-service AI' },
+    ],
+  },
+  {
+    group: 'Sales and GTM',
+    items: [
+      {
+        value: 'Sales intelligence',
+        label: 'Buyer-intent scoring built from public signals — filings, news, executive movement',
+      },
+      { value: '94%', label: 'Cut in a core sales planning workflow' },
+      { value: '300+', label: 'Sales professionals using my agents daily' },
+    ],
+  },
+  {
+    group: 'Governance and adoption',
+    items: [
+      {
+        value: 'Governance',
+        label: 'DLP, PII protection and EU AI Act alignment — built in from day one, now the enterprise standard',
+      },
+      { value: '4×', label: 'Active adoption growth within six months' },
+      {
+        value: 'Audit-ready',
+        label: 'Source-cited outputs, human-review gates and regression discipline on every release',
+      },
+    ],
+  },
+] as const;
+
+/** One-line footnote under the evidence grid. */
+export const evidenceNote = [
+  '15+ years across HR, sales and commercial functions',
+  'Large-deal RFP pursuits supported end to end',
+  'Replaced commercial vendor tools with in-house, auditable platforms',
+  'Microsoft and Google partnerships',
 ] as const;
 
 /** Closing call to action on the homepage. */

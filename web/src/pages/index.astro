@@ -2,7 +2,15 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getArticles } from '../lib/articles';
 import { formatDate } from '../lib/format';
-import { site, hero, focusAreas, metrics, closing } from '../site.config';
+import {
+  site,
+  hero,
+  focusAreas,
+  builtAt,
+  evidence,
+  evidenceNote,
+  closing,
+} from '../site.config';
 
 const articles = await getArticles();
 const featured = articles.slice(0, 4);
@@ -69,16 +77,33 @@ const jsonLd = [
   <section class="section section--tight">
     <div class="container">
       <p class="label metrics-title">By the numbers</p>
-      <dl class="metrics" data-reveal>
-        {
-          metrics.map((m) => (
-            <div class="metric">
-              <dt class="metric-value">{m.value}</dt>
-              <dd class="metric-label">{m.label}</dd>
-            </div>
-          ))
-        }
-      </dl>
+
+      <div class="built-at" data-reveal>
+        <p class="label built-at-title">Built AI at</p>
+        <ul class="built-at-list">
+          {builtAt.map((org) => <li>{org}</li>)}
+        </ul>
+      </div>
+
+      {
+        evidence.map((section) => (
+          <section class="evidence" data-reveal>
+            <h2 class="label evidence-title">{section.group}</h2>
+            <dl class="metrics">
+              {section.items.map((m) => (
+                <div class="metric">
+                  <dt class="metric-value">{m.value}</dt>
+                  <dd class="metric-label">{m.label}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ))
+      }
+
+      <p class="evidence-note" data-reveal>
+        {evidenceNote.join(' · ')}
+      </p>
     </div>
   </section>
 
@@ -296,10 +321,39 @@ const jsonLd = [
     color: var(--ink);
   }
 
-  /* ---- Metrics ---- */
+  /* ---- Evidence ---- */
   .metrics-title {
-    margin: 0 0 1.1rem;
+    margin: 0 0 1.6rem;
   }
+
+  /* Built AI at */
+  .built-at {
+    padding-bottom: 1.6rem;
+  }
+  .built-at-title {
+    margin: 0 0 0.9rem;
+  }
+  .built-at-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 2.2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0 0 1.4rem;
+    border-bottom: 1px solid var(--rule-firm);
+    font-family: var(--font-serif);
+    font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem);
+    color: var(--ink);
+  }
+
+  /* One group: label, rule, then a three-column row */
+  .evidence + .evidence {
+    margin-top: 1.9rem;
+  }
+  .evidence-title {
+    margin: 0 0 0.9rem;
+  }
+
   .metrics {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -307,54 +361,52 @@ const jsonLd = [
     margin: 0;
     border-top: 1px solid var(--rule-firm);
   }
+  .metric {
+    padding: 1.4rem 1.5rem 1.5rem 0;
+    border-right: 1px solid var(--rule);
+  }
+  .metric:first-child {
+    padding-left: 0;
+  }
+  .metric:not(:first-child) {
+    padding-left: 1.5rem;
+  }
+  .metric:last-child {
+    border-right: 0;
+    padding-right: 0;
+  }
+
+  /* Two columns: the third item drops to its own row. */
   @media (max-width: 52rem) {
     .metrics {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-  }
-  @media (max-width: 30rem) {
-    .metrics {
-      grid-template-columns: 1fr;
+    .metric:nth-child(-n + 2) {
+      border-bottom: 1px solid var(--rule);
     }
-  }
-
-  .metric {
-    padding: 1.5rem 1.5rem 1.6rem 0;
-    border-right: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-  }
-
-  /* 3 x 2: no rule after the third column, none under the last row. */
-  @media (min-width: 52rem) {
-    .metric:not(:nth-child(3n + 1)) {
-      padding-left: 1.5rem;
-    }
-    .metric:nth-child(3n) {
-      border-right: 0;
-      padding-right: 0;
-    }
-    .metric:nth-child(n + 4) {
-      border-bottom: 0;
-    }
-  }
-
-  /* 2 x 3 */
-  @media (min-width: 30rem) and (max-width: 52rem) {
     .metric:nth-child(even) {
       border-right: 0;
       padding-right: 0;
       padding-left: 1.5rem;
     }
-    .metric:nth-last-child(-n + 2) {
-      border-bottom: 0;
+    .metric:nth-child(odd) {
+      padding-left: 0;
     }
   }
 
   /* Single column */
   @media (max-width: 30rem) {
-    .metric {
+    .metrics {
+      grid-template-columns: 1fr;
+    }
+    .metric,
+    .metric:nth-child(even),
+    .metric:nth-child(odd) {
       border-right: 0;
       padding: 1.1rem 0;
+    }
+    .metric:not(:last-child) {
+      border-bottom: 1px solid var(--rule);
     }
     .metric:last-child {
       border-bottom: 0;
@@ -367,6 +419,7 @@ const jsonLd = [
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.05;
+    text-wrap: balance;
     color: var(--ink);
   }
   .metric-label {
@@ -375,6 +428,18 @@ const jsonLd = [
     font-family: var(--font-sans);
     font-size: 0.83rem;
     line-height: 1.55;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  .evidence-note {
+    margin: 2.2rem 0 0;
+    padding-top: 1.3rem;
+    border-top: 1px solid var(--rule);
+    max-width: 78ch;
+    font-family: var(--font-sans);
+    font-size: 0.83rem;
+    line-height: 1.7;
     color: var(--muted);
     text-wrap: pretty;
   }
