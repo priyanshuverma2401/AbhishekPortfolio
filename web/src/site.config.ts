@@ -79,7 +79,7 @@ export const hero = {
   /** Small facts under the hero. Keep to three or four. */
   facts: [
     { label: 'Now', value: 'Enterprise AI & Sales Transformation, WNS (Capgemini)' },
-    { label: 'Based in', value: 'Gurugram, India — open to EU / global' },
+    { label: 'Based in', value: 'Gurugram, India' },
     { label: 'In AI since', value: '2011' },
   ],
 } as const;
@@ -157,12 +157,8 @@ export const evidence = [
 ] as const;
 
 /** One-line footnote under the evidence grid. */
-export const evidenceNote = [
-  '15+ years across HR, sales and commercial functions',
-  'Large-deal RFP pursuits supported end to end',
-  'Replaced commercial vendor tools with in-house, auditable platforms',
-  'Microsoft and Google partnerships',
-] as const;
+export const evidenceNote =
+  'Fifteen years turning AI from capability into outcome — across HR, sales and the commercial core, with governance built in from the first line of code.';
 
 /** Closing call to action on the homepage. */
 export const closing = {
@@ -171,6 +167,7 @@ export const closing = {
 } as const;
 
 export const nav = [
+  { label: 'Home', href: '/' },
   { label: 'Writing', href: '/writeups' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
