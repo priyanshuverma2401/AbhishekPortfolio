@@ -90,12 +90,55 @@ const education = [
 ];
 
 const stack = [
-  'Python', 'SQL', 'Azure ML', 'Azure OpenAI', 'Azure AI Search', 'Azure APIM',
-  'Azure Monitor', 'Azure DevOps', 'Copilot Studio', 'Power Platform', 'LangChain',
-  'LangGraph', 'RAG pipelines', 'Vector databases', 'Prompt engineering', 'LLMs',
-  'LLMOps', 'Machine learning', 'Deep learning', 'NLP', 'scikit-learn', 'PySpark',
-  'Databricks', 'Snowflake', 'AWS', 'GCP', 'Power BI', 'FastAPI', 'Docker',
-  'MLOps', 'Streamlit',
+  {
+    group: 'Strategy & Ownership',
+    items: [
+      'AI Transformation Strategy & Roadmaps',
+      'AI Portfolio & Investment Governance',
+      'Build-vs-Buy & Vendor Strategy',
+      'Executive & C-Suite Alignment',
+    ],
+  },
+  {
+    group: 'Governance & Risk',
+    items: [
+      'Responsible AI',
+      'EU AI Act Risk-Classification',
+      'DLP, PII & Data-Boundary Design',
+      'Evaluation, Audit & Regression Discipline',
+      'AI Adoption & Change Management',
+    ],
+  },
+  {
+    group: 'Agentic & GenAI Architecture',
+    items: [
+      'Multi-Agent Systems',
+      'RAG & Retrieval Architecture',
+      'LLMOps',
+      'Grounding & Hallucination Control',
+      'Human-in-the-Loop Design',
+    ],
+  },
+  {
+    group: 'Machine Learning',
+    items: [
+      'Machine Learning',
+      'Deep Learning',
+      'Predictive Modelling',
+      'NLP',
+      'MLOps',
+    ],
+  },
+  {
+    group: 'Platforms',
+    items: [
+      'Azure AI & Microsoft Copilot Stack',
+      'Databricks',
+      'Snowflake',
+      'AWS',
+      'GCP',
+    ],
+  },
 ];
 ---
 
@@ -238,10 +281,19 @@ const stack = [
       </ul>
 
       <div class="stack-block" data-reveal>
-        <p class="label stack-title">Technical stack</p>
-        <ul class="stack">
-          {stack.map((tool) => <li>{tool}</li>)}
-        </ul>
+        <p class="label stack-title">How I work</p>
+        <div class="stack">
+          {
+            stack.map((cat) => (
+              <div class="stack-row">
+                <h3 class="stack-group">{cat.group}</h3>
+                <ul class="stack-tags">
+                  {cat.items.map((tool) => <li>{tool}</li>)}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
       </div>
     </div>
   </section>
@@ -365,14 +417,43 @@ const stack = [
     margin-top: 0.2rem;
   }
 
-  /* ---- Stack ---- */
+  /* ---- How I work ---- */
   .stack-block {
     margin-top: clamp(2rem, 4vw, 2.75rem);
   }
   .stack-title {
-    margin: 0 0 1rem;
+    margin: 0 0 1.4rem;
   }
-  .stack {
+
+  /* Group label on the left, its tags on the right. */
+  .stack-row {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: 1rem 1.5rem;
+    align-items: start;
+    padding-block: 1.1rem;
+  }
+  .stack-row + .stack-row {
+    border-top: 1px solid var(--rule);
+  }
+  @media (max-width: 46rem) {
+    .stack-row {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+  }
+
+  .stack-group {
+    margin: 0;
+    padding-top: 0.25rem;
+    font-family: var(--font-serif);
+    font-size: 1.02rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+
+  .stack-tags {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -380,7 +461,7 @@ const stack = [
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  .stack li {
+  .stack-tags li {
     font-family: var(--font-sans);
     font-size: 0.83rem;
     line-height: 1;
