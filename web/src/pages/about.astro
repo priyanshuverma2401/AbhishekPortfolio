@@ -113,55 +113,40 @@ const stack = [
 
   <!-- ================= Intro ================= -->
   <section class="section">
-    <div class="container intro-grid">
-      <div class="prose" data-reveal>
+    <div class="container">
+      <div class="prose intro-prose" data-reveal>
         <p>
           I have spent fifteen years building AI inside enterprises — first the
           models, then the platforms around them, and now the organisations that
-          have to live with both. The work has tracked the field: regression and
-          churn models on telecom telemetry, NLP and entity extraction for
-          enterprise clients, then large-scale people analytics, then GenAI, and
-          now agentic systems in production.
+          have to live with both. The journey has tracked the field itself: from
+          classical machine learning on enterprise data, to natural language and
+          people analytics at scale, to generative AI, and now agentic systems in
+          production.
         </p>
         <p>
-          Today I lead AI transformation for the commercial function of a $3.3B
-          organisation — owning architecture, governance, investment decisions
-          and the adoption roadmap, reporting to global commercial leadership.
-          The current work is a GTM intelligence layer: an account-signal
-          platform that says who to pursue and when, and an agentic planning
-          platform that says how. Before this I built a 20-person AI practice
-          from zero at LTIMindtree and ran a ~$500K annual cost base against it.
+          The tools changed beyond recognition over those years. The problem
+          underneath never moved. Whether the system was a classical model a
+          decade ago or a multi-agent one today, the questions that decided
+          everything were the same: whose data is this, who is allowed to see the
+          answer, how do we know when it is wrong, and will anyone actually use
+          it. The model at the centre was rarely the hard part. Everything around
+          it is where the work lives.
         </p>
         <p>
-          What I keep finding is that the interesting problems are not modelling
-          problems. They are data-boundary problems, retrieval problems,
-          governance problems, and — most often — adoption problems. I write
-          here about that half of the job, because it is the half that decides
-          whether anything reaches production.
+          Today my work sits with the commercial function — designing the
+          architecture, the governance, and the adoption that turn AI from a
+          promising demo into something an enterprise runs on. I have built AI
+          capabilities from the ground up and delivered platforms used across
+          global organisations, and the lesson has been consistent at every
+          scale: capability is not the constraint. Trust, data boundaries, and
+          adoption are.
+        </p>
+        <p>
+          That is the half of the job I write about here — the unglamorous half
+          that no benchmark measures and every production system depends on. If
+          the model is the easy part, this is the rest of it.
         </p>
       </div>
-
-      <aside class="side" data-reveal>
-        <p class="label side-title">Currently</p>
-        <dl class="side-list">
-          <div>
-            <dt class="label">Role</dt>
-            <dd>Senior Consultant (AVP), Enterprise AI &amp; Sales Transformation</dd>
-          </div>
-          <div>
-            <dt class="label">Focus</dt>
-            <dd>Commercial AI and GTM intelligence at enterprise scale</dd>
-          </div>
-          <div>
-            <dt class="label">Portfolio</dt>
-            <dd>6–7 concurrent AI initiatives; $570M+ in active deals</dd>
-          </div>
-          <div>
-            <dt class="label">Based in</dt>
-            <dd>{site.location} — open to relocation, EU / global</dd>
-          </div>
-        </dl>
-      </aside>
     </div>
   </section>
 
@@ -288,50 +273,16 @@ const stack = [
     margin: 0.75rem 0 0.9rem;
   }
 
-  /* ---- Intro + sidebar ---- */
-  .intro-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 16rem;
-    gap: clamp(2.5rem, 6vw, 5rem);
-    align-items: start;
-  }
-  @media (max-width: 56rem) {
-    .intro-grid {
-      grid-template-columns: 1fr;
-      gap: 2.5rem;
-    }
-  }
-  .intro-grid .prose {
+  /* ---- Intro ---- */
+  /* Overrides the global .prose reading measure (38rem): with the sidebar
+     gone there is nothing beside this block, so it runs the full container. */
+  .intro-prose {
+    max-width: none;
     font-size: var(--step-1);
     line-height: 1.68;
   }
-
-  .side {
-    border-top: 1px solid var(--rule-firm);
-    padding-top: 1.1rem;
-  }
-  .side-title {
-    margin: 0 0 1rem;
-  }
-  .side-list {
-    margin: 0;
-  }
-  .side-list > div {
-    padding-block: 0.75rem;
-    border-bottom: 1px solid var(--rule);
-  }
-  .side-list > div:last-child {
-    border-bottom: 0;
-  }
-  .side-list dt {
-    margin-bottom: 0.25rem;
-  }
-  .side-list dd {
-    margin: 0;
-    font-family: var(--font-serif);
-    font-size: 1rem;
-    color: var(--ink);
-    line-height: 1.45;
+  .intro-prose p:last-child {
+    margin-bottom: 0;
   }
 
   /* ---- Timeline ---- */
