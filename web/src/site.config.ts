@@ -73,9 +73,9 @@ export const site = {
  */
 export const hero = {
   statement:
-    'The model is a commodity. Everything that decides the outcome sits around it.',
+    'AI doesn’t scale on models. It scales on governance, data, and adoption.',
   intro:
-    'Fifteen years building AI from zero to scale — classical machine learning and NLP through to LLMs, RAG pipelines and multi-agent platforms. Most recently a GTM intelligence layer running across a $570M+ active deal portfolio, and before that a 20-person AI practice built from nothing. I write here about the part nobody demos: system design, data quality, governance, and getting people to actually use the thing.',
+    'I help enterprises design and scale AI capability — modernizing systems, building governance into the foundation, and embedding AI into how decisions actually get made. Over fifteen years, I’ve seen the journey from classical machine learning to where we are today with agentic systems, building two AI functions from zero and delivering platforms used by well over a hundred thousand people across global organizations.',
   /** Small facts under the hero. Keep to three or four. */
   facts: [
     { label: 'Now', value: 'Enterprise AI & Sales Transformation, WNS (Capgemini)' },

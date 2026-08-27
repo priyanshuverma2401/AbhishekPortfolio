@@ -79,39 +79,6 @@ const career = [
   },
 ];
 
-const work = [
-  {
-    name: 'GTM Intelligence Layer — Signal Platform',
-    org: 'WNS / Capgemini',
-    note: 'Account intelligence built on open data: 10-K and 8-K filings, earnings calls, Yahoo Finance and Google News, executive movement, hiring and funding signals — combined into a composite buyer-intent score for pipeline prioritisation across BFSI, Healthcare and other verticals. Replaced a $4,000/year commercial subscription.',
-  },
-  {
-    name: 'GTM Intelligence Layer — Account Planning Agent',
-    org: 'WNS / Capgemini',
-    note: 'Production agentic platform turning CRM records, account signals, internal proof points and an enterprise knowledge base into a pursuit-ready plan in under ten minutes rather than two to three hours. It closes the loop: signal, priority, plan, pursuit.',
-  },
-  {
-    name: 'Proposal & Pursuit Strategy Copilot',
-    org: 'WNS / Capgemini',
-    note: 'LLM-powered pursuit system for $20M–$100M RFP cycles — pre-RFP strategy, win themes, executive briefings, SME mobilisation, orals prep and post-meeting iteration. Source-grounded and human-gated throughout.',
-  },
-  {
-    name: 'AI Talent Marketplace (SmartMatch)',
-    org: 'LTIMindtree',
-    note: 'Two-way agentic matching across 100,000 users at 90% accuracy, with 90,000 structured skill profiles created behind it. Replaced a ~$200K annual vendor licence and, unlike it, could explain every match it made.',
-  },
-  {
-    name: 'Enterprise GenAI Suite',
-    org: 'LTIMindtree',
-    note: 'The organisation’s first production GenAI, in 2023: a Sales Proposal Bot (~40% less RFP preparation effort), an HR Policy Q&A Bot (~35% lower helpdesk load) and a Cybersecurity Risk & Control Bot. Standards co-developed with Microsoft product teams.',
-  },
-  {
-    name: 'People Analytics & ML Platforms',
-    org: 'LTIMindtree',
-    note: 'Joining propensity, a three-layer explainable attrition predictor built to be usable by HR business partners, employee-project matching on Azure ML with NLP embeddings at 90% accuracy, and salary forecasting.',
-  },
-];
-
 const education = [
   {
     award: 'MBA',
@@ -226,39 +193,8 @@ const stack = [
     </div>
   </section>
 
-  <!-- ================= Selected work ================= -->
-  <section class="section">
-    <div class="container">
-      <div class="section-header" data-reveal>
-        <p class="label">Selected work</p>
-        <div>
-          <h2>Platforms I have shipped</h2>
-          <p>
-            Systems that reached production and stayed there, rather than
-            proofs of concept. Client detail withheld where it should be.
-          </p>
-        </div>
-      </div>
-
-      <ol class="work" data-reveal>
-        {
-          work.map((item, i) => (
-            <li class="work-item">
-              <span class="index-num">{String(i + 1).padStart(2, '0')}</span>
-              <div class="work-body">
-                <h3>{item.name}</h3>
-                <p class="label work-org">{item.org}</p>
-                <p>{item.note}</p>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
-    </div>
-  </section>
-
   <!-- ================= Career ================= -->
-  <section class="section section--band">
+  <section class="section">
     <div class="container">
       <div class="section-header" data-reveal>
         <p class="label">Background</p>
@@ -396,47 +332,6 @@ const stack = [
     font-size: 1rem;
     color: var(--ink);
     line-height: 1.45;
-  }
-
-  /* ---- Selected work ---- */
-  .work {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    border-top: 1px solid var(--rule-firm);
-  }
-  .work-item {
-    display: grid;
-    grid-template-columns: 4rem minmax(0, 1fr);
-    gap: 0 1rem;
-    padding-block: 1.75rem;
-    border-bottom: 1px solid var(--rule);
-  }
-  @media (max-width: 40rem) {
-    .work-item {
-      grid-template-columns: 1fr;
-      gap: 0;
-    }
-  }
-  .work-item .index-num {
-    padding-top: 0.4rem;
-    margin-bottom: 0;
-  }
-  .work-body h3 {
-    font-size: 1.12rem;
-    margin: 0 0 0.3rem;
-    line-height: 1.4;
-  }
-  .work-org {
-    margin: 0 0 0.7rem;
-  }
-  .work-body > p:last-child {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.98rem;
-    line-height: 1.68;
-    max-width: 62ch;
-    text-wrap: pretty;
   }
 
   /* ---- Timeline ---- */
