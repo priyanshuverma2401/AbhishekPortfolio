@@ -12,7 +12,6 @@ const roleLine = [site.jobTitle, site.company].filter(Boolean).join(', ');
       <div class="foot-identity">
         <p class="foot-name">{site.name}</p>
         {roleLine && <p class="label foot-role">{roleLine}</p>}
-        <p class="foot-blurb">{site.tagline}</p>
       </div>
 
       <div class="foot-cta">
@@ -42,7 +41,6 @@ const roleLine = [site.jobTitle, site.company].filter(Boolean).join(', ');
       <nav class="foot-col" aria-label="Footer navigation">
         <p class="label">Site</p>
         <ul>
-          <li><a href="/">Home</a></li>
           {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
         </ul>
       </nav>
@@ -53,14 +51,6 @@ const roleLine = [site.jobTitle, site.company].filter(Boolean).join(', ');
           <li><a href="/rss.xml">RSS feed</a></li>
           <li><a href={site.linkedin} rel="me noopener" target="_blank">LinkedIn</a></li>
         </ul>
-      </div>
-
-      <div class="foot-col foot-col--wide">
-        <p class="label">Colophon</p>
-        <p class="foot-note">
-          Built with Astro and served as static HTML. Set in Source Serif 4 and
-          Inter. No trackers, no cookie banner, no newsletter popup.
-        </p>
       </div>
     </div>
 
@@ -106,14 +96,7 @@ const roleLine = [site.jobTitle, site.company].filter(Boolean).join(', ');
     line-height: 1.1;
   }
   .foot-role {
-    margin: 0 0 1.1rem;
-  }
-  .foot-blurb {
     margin: 0;
-    max-width: 44ch;
-    color: var(--muted);
-    line-height: 1.65;
-    text-wrap: pretty;
   }
 
   .foot-cta {
@@ -159,7 +142,7 @@ const roleLine = [site.jobTitle, site.company].filter(Boolean).join(', ');
   /* ---- Columns ---- */
   .foot-cols {
     display: grid;
-    grid-template-columns: 1fr 1fr 2fr;
+    grid-template-columns: 1fr 1fr;
     gap: clamp(2rem, 5vw, 4rem);
     padding-block: clamp(2.25rem, 5vw, 3rem);
   }
@@ -167,9 +150,6 @@ const roleLine = [site.jobTitle, site.company].filter(Boolean).join(', ');
     .foot-cols {
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
-    }
-    .foot-col--wide {
-      grid-column: 1 / -1;
     }
   }
 
@@ -195,15 +175,6 @@ const roleLine = [site.jobTitle, site.company].filter(Boolean).join(', ');
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
-  .foot-note {
-    margin: 0;
-    max-width: 42ch;
-    font-family: var(--font-sans);
-    font-size: 0.86rem;
-    line-height: 1.65;
-    color: var(--muted);
-  }
-
   /* ---- Base ---- */
   .foot-base {
     display: flex;
