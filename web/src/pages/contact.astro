@@ -41,17 +41,18 @@ const channels = [
   },
 ];
 
-const yes = [
-  'Senior roles in enterprise AI transformation — India, EU or global. I am open to relocation.',
-  'Advisory conversations on AI strategy, governance, or taking an agentic platform from pilot to production.',
-  'Speaking on enterprise AI, commercial AI and GTM intelligence, responsible AI and the EU AI Act.',
-  'Correspondence about something I have written here — including disagreement.',
+const attention = [
+  'Taking agentic platforms from promising pilot to governed production.',
+  'AI governance that engineers adopt and leadership can enforce — DLP, evaluation, the EU AI Act as architecture.',
+  'Commercial AI and GTM intelligence — where enterprise systems meet revenue outcomes.',
+  'The half of the job no benchmark measures: data boundaries, trust, and adoption.',
 ];
 
-const no = [
-  'Unsolicited vendor pitches and generic partnership outreach.',
-  'Requests to review, promote or endorse tools I have not run in production.',
-  'Anything that begins by telling me what my own priorities are.',
+const exploring = [
+  'How agent portfolios get owned, evaluated and kept safe at enterprise scale.',
+  'Where the human belongs in increasingly autonomous systems.',
+  'The shift from picking the best model to deploying the one you can actually govern.',
+  'Ideas from what I write here — including where you think I’m wrong.',
 ];
 ---
 
@@ -94,15 +95,15 @@ const no = [
     </div>
   </section>
 
-  <!-- ================= Yes / no ================= -->
+  <!-- ================= What I think about ================= -->
   <section class="section section--band">
     <div class="container">
       <div class="section-header" data-reveal>
         <p class="label">Before you write</p>
         <div>
-          <h2>What tends to get a reply</h2>
+          <h2>What I think about</h2>
           <p>
-            Not a set of rules so much as an honest account of where my
+            Not a contact form so much as an honest account of where my
             attention actually goes.
           </p>
         </div>
@@ -110,15 +111,15 @@ const no = [
 
       <div class="split" data-reveal>
         <div class="split-col">
-          <p class="label split-title split-title--yes">Usually yes</p>
+          <p class="label split-title">Where my attention goes</p>
           <ul class="ticks">
-            {yes.map((item) => <li>{item}</li>)}
+            {attention.map((item) => <li>{item}</li>)}
           </ul>
         </div>
         <div class="split-col">
-          <p class="label split-title split-title--no">Usually no</p>
-          <ul class="ticks ticks--no">
-            {no.map((item) => <li>{item}</li>)}
+          <p class="label split-title">What I’m exploring next</p>
+          <ul class="ticks">
+            {exploring.map((item) => <li>{item}</li>)}
           </ul>
         </div>
       </div>
@@ -172,7 +173,7 @@ const no = [
     color: var(--accent);
   }
 
-  /* ---- Yes / no ---- */
+  /* ---- What I think about ---- */
   .split {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -211,10 +212,6 @@ const no = [
   .split-title {
     margin: 0 0 1.1rem;
   }
-  .split-title--yes {
-    color: var(--accent);
-  }
-
   .ticks {
     list-style: none;
     margin: 0;
@@ -240,12 +237,6 @@ const no = [
     top: 0.62em;
     width: 0.5rem;
     height: 1px;
-    background: var(--accent);
-  }
-  .ticks--no li {
-    color: var(--muted);
-  }
-  .ticks--no li::before {
     background: var(--rule-firm);
   }
 </style>
