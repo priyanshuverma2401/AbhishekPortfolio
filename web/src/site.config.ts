@@ -133,11 +133,11 @@ export const evidence = [
     group: 'Sales and GTM',
     items: [
       {
-        value: 'Sales intelligence',
-        label: 'Buyer-intent scoring built from public signals — filings, news, executive movement',
+        value: 'GTM Intelligence',
+        label: 'End-to-end AI pipeline from market signals to pursuit-ready account plans — account intelligence, pursuit strategy, proposal and travel agents.',
       },
-      { value: '94%', label: 'Cut in a core sales planning workflow' },
-      { value: '300+', label: 'Sales professionals using my agents daily' },
+      { value: '94%', label: 'Cut in account planning time' },
+      { value: '400+', label: 'AI-generated account plans delivered to senior sales leaders' },
     ],
   },
   {
